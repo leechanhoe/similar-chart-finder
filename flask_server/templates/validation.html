@@ -1,0 +1,389 @@
+{% extends "base.html" %}
+{% block title %}{{ translations['비슷한 차트 검색'] }} - {{ translations['검증'] }}{% endblock %}
+{% block og_title %}{{ translations['비슷한 차트 검색'] }} - {{ translations['검증'] }}{% endblock %}
+{% block og_image %}{{ url_for('static', filename='image_data/static_image/link_logo_' + lang + '.png') }}{% endblock %}
+{% block og_description %}{{ translations['평가가 좋은 종목은 실제로 상승할까요?'] }}{% endblock %}
+{% block description %}{{ translations['평가가 좋은 종목은 실제로 상승할까요?'] }}{% endblock %}
+{% block content %}
+<!DOCTYPE html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/score_range.css') }}">
+    <script src="{{ url_for('static', filename='js/expandCollapse.js') }}"></script>
+    
+    <style>
+        .pagination-container {
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .pagination {
+            display: flex;
+            flex-wrap: wrap;  /* 줄바꿈 허용 */
+            justify-content: center;  /* 버튼 중앙 정렬 */
+        }
+        .pagination .page-item {
+            margin: 2px;  /* 버튼 간격 조절 */
+        }
+    </style>
+
+<style>
+    .line {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: black;
+    }
+    .line::before, .line::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid skyblue;
+    }
+    .line::before {
+        margin-right: .25em;
+    }
+    .line::after {
+        margin-left: .25em;
+    }
+    #expand_collapse {
+        background: none;
+        border: none;
+        outline: none;
+        color: gray;
+    }
+</style>
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="mt-3" style="text-align: center"><b>{{ translations['검증'] }}</b></h2>
+        <h6 style="text-align: center; margin-top: -10px;">veta</h6>
+        <div class="row justify-content-center" style="margin-top: 50px; margin-bottom: 30px;">
+            <p class="text-center">{{ translations['평가가 좋은 종목은 실제로 상승할까요?'] | safe}}</p>
+            <p class="text-center">{{ translations['미국주식 시가총액 상위 200개 종목(Nasdaq 100, NYSE 100)으로 실제 검증 결과, 비슷한 차트들이 상승하면 실제 상승확률도 높아집니다.'] | safe}}</p>
+            <p class="text-center" style="font-size: 1.1em;">{{ translations['검증 결과를 매일 직접 확인해보세요!'] | safe}}</p>
+        </div>
+        <hr>
+        <div class="justify-content-center text-center">
+            <div class="tooltip-container">
+                <h5 class="mt-5" style="text-align: center"><b>{{ translations['점수 구간별 상승 확률'] }}</b> 
+                    <span class="tooltip-icon day_num_button" style="margin-left: 5px; font-size:13px; padding:6px 10px;" onclick="toggleTooltip('tooltip_rise_ratio')">?</span>
+                </h5>
+                <div class="tooltip-text" id="tooltip_rise_ratio">
+                    <span>※ {{ translations['미국주식 상위 200 기준'] | safe}}</span>   
+                    <br>
+                    <span>※ <b>{{ translations['검증'] }} {{ translations['기간'] }}</b> : 2024-03-21 ~ {{ validation_date }}</span> 
+                    <br>                   
+                    <span>※ <b> {{ translations['상승 확률'] }}</b> : {{ translations['상위 200개 종목 중 10 거래일 후 종가가 평가일의 종가보다 상승한 종목의 비율'] }}</span>
+                </div>
+            </div>
+        </div>
+        <div id="total_validation" {% if current_page != 1 %}style="display: none;"{% endif %}>
+            <!-- 상단2 -->
+            {% if user_agent != "SimilarChartFinder/1.0/dev" %}
+            <div style="margin-top: 10px; margin-bottom: 10px;">
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7879029685491158"
+                    crossorigin="anonymous"></script>
+                <ins class="adsbygoogle"
+                    style="display:block; height:90px;"
+                    data-ad-client="ca-pub-7879029685491158"
+                    data-ad-slot="3873312112"
+                    data-ad-format="horizontal"
+                    data-full-width-responsive="false"></ins>
+                <script>
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+            {% endif %}
+            <div class="row justify-content-end" style="margin-top: 30px;">
+                <div class="tooltip-container">
+                    <p class="text-right ml-auto" style="font-size: 0.8em; white-space: nowrap;">
+                        <span>※ {{ translations['기준'] }} : <b class="{{ 'green' if lang == 'ko' else 'blue' }}">{{ validation_date }}</b></span>
+                        <span class="tooltip-icon day_num_button" style="font-size:10px; padding:2px 6px;" onclick="toggleTooltip('tooltip_update_date')">?</span>
+                    </p>
+                    <div class="tooltip-text" id="tooltip_update_date">
+                        <span>{{ translations['매일 장 종료 후 3시간 이내에 모든 최신 데이터가 업데이트됩니다.'] }}</span>
+                        <br>
+                        <span>{{ translations['검증에는 10 거래일이 소요되므로 최신 검증 날짜 기준은 10 거래일 전입니다.'] }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row justify-content-end" style="overflow-x: auto;">
+                <table class="table" style="width: 100%; table-layout: fixed;">
+                    <colgroup>
+                        <col style="width: 25%;">
+                        <col style="width: 20%;">
+                        <col style="width: 55%;">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th class="item_name">{{ translations['점수 구간'] }}</th>
+                            <th class="score">{{ translations['상승 확률'] }}</th>
+                            <th class="profit">{{ translations['상승'] }}/{{ translations['전체'] }}(+<span class="{{ 'green' if lang == 'ko' else 'blue' }}">{{ translations['최신'] }}</span>)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in total_validation %}
+                        <tr style="opacity: 1; cursor: auto; background-color: #f5f5f5; pointer-events: none;">
+                            <td class="
+                            {% if lang == 'ko' %}
+                                {% if loop.index == 1 %}
+                                    tr-blue-dark
+                                {% elif loop.index == 2 %}
+                                    tr-blue-medium
+                                {% elif loop.index == 3 %}
+                                    tr-blue-light
+                                {% elif loop.revindex == 3 %}
+                                    tr-red-light
+                                {% elif loop.revindex == 2 %}
+                                    tr-red-medium
+                                {% elif loop.revindex == 1 %}
+                                    tr-red-dark
+                                {% endif %}
+                            {% else %}
+                                {% if loop.index == 1 %}
+                                    tr-red-dark
+                                {% elif loop.index == 2 %}
+                                    tr-red-medium
+                                {% elif loop.index == 3 %}
+                                    tr-red-light
+                                {% elif loop.revindex == 3 %}
+                                    tr-green-light
+                                {% elif loop.revindex == 2 %}
+                                    tr-green-medium
+                                {% elif loop.revindex == 1 %}
+                                    tr-green-dark
+                                {% endif %}
+                            {% endif %}">
+                                {{ row['score_range'] }}
+                            </td>
+                            <td>
+                                {% if row['rise_ratio'] >= 55 %}
+                                <b class="{{ 'red' if lang == 'ko' else 'green' }}">{{ row['rise_ratio'] }}%</b>
+                                {% elif row['rise_ratio'] <= 45 %}
+                                <b class="{{ 'blue' if lang == 'ko' else 'red' }}">{{ row['rise_ratio'] }}%</b>
+                                {% else %}
+                                <b>{{ row['rise_ratio'] }}%</b>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <b>{{ row['total_rise_num'] }}</b>({{ row['prev_total_rise_num']}}+<span class="{{ 'green' if lang == 'ko' else 'blue' }}">{{ row['rise_num']}}</span>) 
+                                / <b>{{ row['range_total_num'] }}</b>({{ row['prev_total_num']}}+<span class="{{ 'green' if lang == 'ko' else 'blue' }}">{{ row['num']}}</span>)
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row justify-content-center line" style="margin-top: 30px;">
+            <button id="expand_collapse">
+                {% if current_page != 1 %}
+                {{ translations['펼치기'] }} ↓
+                {% else %}
+                {{ translations['접기'] }} ↑
+                {% endif %}
+            </button>
+        </div>
+        <!-- 상단3 -->
+        {% if user_agent != "SimilarChartFinder/1.0/dev" %}
+        <div style="margin-top: 30px; margin-bottom: 10px;">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7879029685491158"
+                crossorigin="anonymous"></script>
+            
+            <ins class="adsbygoogle"
+                style="display:block; height:90px;"
+                data-ad-client="ca-pub-7879029685491158"
+                data-ad-slot="7641694364"
+                data-ad-format="horizontal"
+                data-full-width-responsive="false"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+        {% endif %}
+        <br>
+        <br>
+        <h4 class="mt-5" style="text-align: center"><b>{{ translations['상세 검증'] }}</b></h4>
+        <div class="buttons mt-5">
+            {% if type == 'date' %}
+                <a id="all_button" href="#" class="invalid_button" onclick="event.preventDefault();">
+                    {{ translations['날짜 별'] | safe }}
+                </a>
+            {% else %}
+                <a id="all_button" href="{{ url_for('validation.validation', page=1, lang=lang, type='date') }}" 
+                class="day_num_button" onclick="LoadingWithMask();">
+                    {{ translations['날짜 별'] | safe }}
+                </a>
+            {% endif %}
+            {% if type == 'rise' %}
+                <a id="up_button" href="#" class="invalid_button" onclick="event.preventDefault();">
+                    {{ translations['상승'] }}(+6)
+                </a>
+            {% else %}
+                <a id="up_button" href="{{ url_for('validation.validation', page=1, lang=lang, type='rise') }}" 
+                class="day_num_button" onclick="LoadingWithMask();">
+                    {{ translations['상승'] }}(+6)
+                </a>
+            {% endif %}
+            {% if type == 'fall' %}
+                <a id="down_button" href="#" class="invalid_button" onclick="event.preventDefault();">
+                    {{ translations['하락'] }}(-4)
+                </a>
+            {% else %}
+                <a id="down_button" href="{{ url_for('validation.validation', page=1, lang=lang, type='fall') }}" 
+                class="day_num_button" onclick="LoadingWithMask();">
+                    {{ translations['하락'] }}(-4)
+                </a>
+            {% endif %}
+        </div>
+        {% if type == 'rise' or type == 'fall' %}
+        <div class="row justify-content-center" style="overflow-x: auto; margin-top: 10px;">
+            <table class="table" style="width: 100%; table-layout: fixed;">
+                <colgroup>
+                    <col style="width: 65%;">
+                    <col style="width: 10%;">
+                    <col style="width: 25%;">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="item_name">{{ translations['종목명'] }}</th>
+                        <th class="score">{{ translations['점수'] }}</th>
+                        <th class="profit">{{ translations['10거래일후'] }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in detail_data %}
+                    <tr onclick="LoadingWithMask(); window.location.href='{{ url_for('validation.detail', code=row['code'], date=row['date'], lang=lang) }}'">
+                        <td>
+                            {{ row['formated_date'] }}. 
+                            <b style="white-space: normal;">
+                                {% if row['name'] %}
+                                    {{ row['name'] }}
+                                {% else %}
+                                    {{ row['code'] }}
+                                {% endif %}
+                            </b>
+                        </td>
+                        <td>
+                            {% if row['score'] >= 0 %}
+                            <b class="{{ 'red' if lang == 'ko' else 'green' }}">{{ row['score'] }}</b>
+                            {% else %}
+                            <b class="{{ 'blue' if lang == 'ko' else 'red' }}">{{ row['score'] }}</b>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if row['profit'] is float %}
+                                {% if lang == 'ko' %}
+                                    <b class="{{ 'red' if row['profit'] >= 0 else 'blue' }}">
+                                        {{ row['profit'] | round(2) }}%</b>
+                                {% else %}
+                                    <b class="{{ 'green' if row['profit'] >= 0 else 'red' }}">
+                                        {{ row['profit'] | round(2) }}%</b>
+                                {% endif %}
+                            {% else %}
+                                {{ row['profit'] }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="row justify-content-center" style="overflow-x: auto; margin-top: 10px;">
+            <table class="table" style="width: 100%; table-layout: fixed;">
+                <colgroup>
+                    <col style="width: 80%;">
+                    <col style="width: 20%;">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="date">{{ translations['날짜'] }}</th>
+                        <th class="remarks">{{ translations['비고'] }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in detail_data %}
+                    <tr onclick="LoadingWithMask(); window.location.href='{{ url_for('validation.daliy', date=row['date'], lang=lang) }}'">
+                        <td>
+                            {{ row['date'] }}. 
+                            <b style="white-space: normal;">
+                                {{ translations['검증'] }} {{ translations['결과'] }}
+                            </b>
+                        </td>
+                        <td>
+                            {{ row['remarks'] }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+        <div class="pagination-container">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if current_page > 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('validation.validation', page=current_page - 1, lang=lang, type=type) }}"
+                        onclick="LoadingWithMask();">◀</a>
+                    </li>
+                    {% endif %}
+
+                    {% if current_page > 3 %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('validation.validation', page=1, lang=lang, type=type) }}"
+                        onclick="LoadingWithMask();">1</a>
+                    </li>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+
+                    {% for p in page_range %}
+                    <li class="page-item {{ 'active' if p == current_page }}">
+                        <a class="page-link" href="{{ url_for('validation.validation', page=p, lang=lang, type=type) }}"
+                        onclick="LoadingWithMask();">{{ p }}</a>
+                    </li>
+                    {% endfor %}
+
+                    {% if current_page < total_pages - 2 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('validation.validation', page=total_pages, lang=lang, type=type) }}"
+                        onclick="LoadingWithMask();">{{ total_pages }}</a>
+                    </li>
+                    {% endif %}
+
+                    {% if current_page < total_pages %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('validation.validation', page=current_page + 1, lang=lang, type=type) }}"
+                        onclick="LoadingWithMask();">▶</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        <!-- 상단4 -->
+        {% if user_agent != "SimilarChartFinder/1.0/dev" %}
+        <div style="margin-top: 30px; margin-bottom: 30px;">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7879029685491158"
+                crossorigin="anonymous"></script>
+                
+            <ins class="adsbygoogle"
+                style="display:block; height:90px;"
+                data-ad-client="ca-pub-7879029685491158"
+                data-ad-slot="7540160542"
+                data-ad-format="horizontal"
+                data-full-width-responsive="false"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+        {% endif %}
+        <div id="loadingcontainer"></div>
+        <hr>
+    </div>
+</body>
+
+</html>
+{% endblock %}

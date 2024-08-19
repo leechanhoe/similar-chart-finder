@@ -1,0 +1,23 @@
+
+*.pkl
+*.pyc
+/shared_files/static/image_data/kospi_daq/*
+/shared_files/static/image_data/nyse_naq/*
+/shared_files/static/image_data/statistics/*
+/shared_files/static/image_data/cache/*
+/shared_files/static/image_data/statistics/popular_kospi_daq.png
+/shared_files/static/image_data/statistics/popular_nyse_naq.png
+*.csv
+etc/main copy.py
+/etc
+/docker-compose*
+data_updater_shared_files/candle_color_method.py
+data_updater_shared_files/direction_method.py
+data_updater_shared_files/prepared_data.py
+flask_server/api.py
+flask_server/controller/secret.py
+flask_server/templates/admin_page.html
+shared_files/pyfile/candle_pattern_search.py
+shared_files/static/ads.txt
+shared_files/static/app-ads.txt
+shared_files/pyfile/drawing_search.py

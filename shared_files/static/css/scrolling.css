@@ -1,0 +1,25 @@
+.scrolling-div {
+    width: 100%;
+    height: auto; /* div의 높이를 자동으로 설정 */
+    overflow-x: hidden;
+    white-space: nowrap;
+    border-top: 2px solid #000;
+    border-bottom: 2px solid #000;
+}
+
+.scrolling-div div {
+    display: inline-flex; 
+    width: auto; 
+    height: auto; 
+    text-align: center;
+    justify-content: center; 
+    align-items: center; 
+    padding: 10px;
+    margin: 0 20px; /* 양 옆 마진 설정 */
+}
+
+/* 테이블 올렸을 때 */
+.scrolling-div div :hover {
+    cursor: pointer;
+    background-color: #eeeeee;
+}

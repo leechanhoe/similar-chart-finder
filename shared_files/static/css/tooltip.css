@@ -1,0 +1,41 @@
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+}
+  
+.tooltip-icon {
+    cursor: pointer;
+}
+  
+.tooltip-text {
+    display: none;
+    position: absolute;
+    right: 0; /* 기본적으로 툴팁을 오른쪽에 정렬 */
+    bottom: 100%;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 10px;
+    width: 250px; /* 너비를 조정하세요 */
+    z-index: 1000;
+    box-sizing: border-box; /* 패딩과 보더가 너비에 포함되도록 설정 */
+    border: 1px solid #ccc;
+}
+
+.tooltip-container:hover .tooltip-text {
+    display: block;
+}
+  
+.tooltip-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+    border: none; /* 테두리 제거 */
+    background: none; /* 배경 제거 */
+}
+
+.tooltip-text span {
+    font-size: 0.8em;
+    display: block; /* span을 block 요소로 만들어 줄 바꿈을 적용합니다. */
+}

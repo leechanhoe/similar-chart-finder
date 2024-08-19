@@ -1,0 +1,15 @@
+mysql-connector-python
+mplfinance
+sqlalchemy
+finance-datareader
+pandas
+numpy
+beautifulsoup4
+pymysql
+python-dateutil
+plotly
+exchange_calendars
+html5lib
+redis
+scipy
+googletrans==4.0.0rc1

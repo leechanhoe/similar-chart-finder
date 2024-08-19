@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}{{ translations['비슷한 차트 검색'] }} - {{ translations['랭킹'] }}{% endblock %}
+{% block og_title %}{{ translations['비슷한 차트 검색'] }} - {{ translations['랭킹'] }}{% endblock %}
+{% block og_image %}{{ url_for('static', filename='image_data/statistics/' + image_name + '_' + lang + '.png') }}{% endblock %}
+{% block og_description %}{{ translations['가장 많이 상승하거나 하락하는 차트는 어떤 모습일까요?'] }}{% endblock %}
+{% block description %}{{ translations['가장 많이 상승하거나 하락하는 차트는 어떤 모습일까요?'] }}{% endblock %}
+{% block content %}
+<!DOCTYPE html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="mt-3" style="text-align: center"><b>{{ translations['랭킹'] }}</b></h2>
+        <div class="row justify-content-center" style="margin-top: 30px; margin-bottom: 30px;">
+            <p class="text-center" style="font-size: 1.2em;">{{ translations['가장 많이 상승하거나 하락하는 차트는 어떤 모습일까요?'] | safe}}</p>
+        </div>
+        <hr>
+        <form method="POST" action="{{ url_for('statistics.submit') }}">
+            <div class="form-group">
+                <label for="market_kospi_daq"><b class="market">{{ translations['시장'] }}</b></label>
+                <br>
+                <div class="custom-control custom-radio custom-control-inline" style="margin-right: 20px;">
+                    <input type="radio" id="market_kospi_daq" name="market" class="custom-control-input" value="kospi_daq" {% if market_type == 'kospi_daq' %}checked{% endif %}>
+                    <label class="custom-control-label korea" for="market_kospi_daq">{{ translations['한국'] }}</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline" style="margin-right: 20px;">
+                    <input type="radio" id="market_nyse_naq" name="market" class="custom-control-input" value="nyse_naq" {% if market_type == 'nyse_naq' %}checked{% endif %}>
+                    <label class="custom-control-label us" for="market_nyse_naq">{{ translations['미국'] }}</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="up_true"><b class="change">{{ translations['변동'] }}</b></label>
+                <br>
+                <div class="custom-control custom-radio custom-control-inline" style="margin-right: 20px;">
+                    <input type="radio" id="up_true" name="up" class="custom-control-input" value="True" {% if up %}checked{% endif %}>
+                    <label class="custom-control-label up" for="up_true">{{ translations['상승'] }}</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline" style="margin-right: 20px;">
+                    <input type="radio" id="up_false" name="up" class="custom-control-input" value="False" {% if not up %}checked{% endif %}>
+                    <label class="custom-control-label down" for="up_false">{{ translations['하락'] }}</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="rise_rate_false"><b class="sort_key">{{ translations['정렬기준'] }}</b></label>
+                <br>
+                <div class="custom-control custom-radio custom-control-inline" style="margin-right: 20px;">
+                    <input type="radio" id="rise_rate_false" name="rise_rate" class="custom-control-input" value="False" {% if not rise_rate %}checked{% endif %}>
+                    <label class="custom-control-label average" for="rise_rate_false">{{ translations['평균변동률'] }}</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline" style="margin-right: 20px;">
+                    <input type="radio" id="rise_rate_true" name="rise_rate" class="custom-control-input" value="True" {% if rise_rate %}checked{% endif %}>
+                    <label class="custom-control-label rise_rate" for="rise_rate_true">{{ translations['상승차트비율'] }}</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="day_num_1"><b class="day_num">{{ translations['비교 일수'] }}</b></label>
+                <br>
+                {% for num in ['all', '128', '64', '32', '16', '8'] %}
+                <div class="custom-control custom-radio custom-control-inline" style="margin-right: 20px;">
+                    <input type="radio" id="day_num_{{ loop.index }}" name="day_num" class="custom-control-input" value="{{ num }}" {{ 'checked' if num == day_num }}>
+                    <label class="custom-control-label" for="day_num_{{ loop.index }}">
+                        {% if lang == 'ko' and num == 'all' %}
+                        종합
+                        {% else %}
+                        {{ num }}
+                        {% endif %}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            <input type="hidden" name="lang" value="{{ lang }}">
+            <input type="submit" class="day_num_button" style="font-size:15px; padding: 11px 11px;" value="{{ translations['조회'] }}" onclick="LoadingWithMask();">
+        </form>
+        <!-- 상단2 -->
+        {% if user_agent != "SimilarChartFinder/1.0/dev" %}
+        <div style="margin-top: 10px; margin-bottom: 10px;">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7879029685491158"
+                crossorigin="anonymous"></script>
+            <ins class="adsbygoogle"
+                style="display:block; height:90px;"
+                data-ad-client="ca-pub-7879029685491158"
+                data-ad-slot="3873312112"
+                data-ad-format="horizontal"
+                data-full-width-responsive="false"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+        {% endif %}
+        <div class="row justify-content-center" style="overflow-x: auto; margin-top: 50px;">
+            <p class="text-right mt-1 ml-auto"><b class="std_date">{{ date }}</b></p>
+            <table class="table" style="width: 100%; table-layout: fixed;">
+                <colgroup>
+                    <col style="width: 55%;">
+                    <col style="width: 25%;">
+                    <col style="width: 20%;">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="item_name">{{ translations['종목명'] }}</th>
+                        <th class="average">{{ translations['향후평균변동'] }}</th>
+                        <th class="rise_rate">{{ translations['상승차트비율'] }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data %}
+                    <tr onclick="LoadingWithMask(); window.location.href='{{ url_for('stock.stock', code=row['code'], lang=lang) }}'">
+                        <td>
+                            <b style="white-space: normal;">{{ loop.index }}. {{ row['name'] }}</b>
+                        </td>
+                        <td>
+                            {% if lang == 'ko' %}
+                            <b class="{{ 'red' if row['average'] >= 0 else 'blue' }}">
+                                {{ row['average'] }}% {{ '▲' if row['average'] >= 0 else '▼' }}</b>
+                            {% else %}
+                            <b class="{{ 'green' if row['average'] >= 0 else 'red' }}">
+                                {{ row['average'] }}% {{ '▲' if row['average'] >= 0 else '▼' }}</b>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if row['rise_rate'] >= 70 %}
+                            <b class="{{ 'red' if lang == 'ko' else 'green' }}">{{ row['rise_rate'] }}%</b>
+                            {% elif row['rise_rate'] <= 30 %}
+                            <b class="{{ 'blue' if lang == 'ko' else 'red' }}">{{ row['rise_rate'] }}%</b>
+                            {% else %}
+                            <b>{{ row['rise_rate'] }}%</b>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p class="text-right mt-1 ml-auto" style="font-size: 0.8em;">
+                ※ <b class="average">{{ translations['향후평균변동'] }}</b> : <span class="average_desc">{{ translations['비슷한 차트들의 향후 평균 변동률'] }}</span>
+                <br>
+                ※ <b class="rise_rate">{{ translations['상승차트비율'] }}</b> : <span class="rise_rate_desc">{{ translations['비슷한 차트들 중 향후 상승한 차트의 비율'] }}</span>
+            </p>
+        </div>
+        <!-- 상단3 -->
+        {% if user_agent != "SimilarChartFinder/1.0/dev" %}
+        <div style="margin-top: 10px; margin-bottom: 10px;">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7879029685491158"
+                crossorigin="anonymous"></script>
+            
+            <ins class="adsbygoogle"
+                style="display:block; height:90px;"
+                data-ad-client="ca-pub-7879029685491158"
+                data-ad-slot="7641694364"
+                data-ad-format="horizontal"
+                data-full-width-responsive="false"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+        {% endif %}
+        <div class="row justify-content-center">
+            <img src="{{ url_for('static', filename='image_data/statistics/' + image_name + '_' + lang + '.png') }}" class="img-fluid" alt="statistics_chart"/>
+        </div>
+        <div id="loadingcontainer"></div>
+    </div>
+    <hr>
+</body>
+
+</html>
+{% endblock %}

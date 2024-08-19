@@ -1,0 +1,489 @@
+{% extends "base.html" %}
+{% block title %}{{ data['name'] }} - {{ translations['비슷한 차트들로 본 주가 전망'] }}{% endblock %}
+{% block og_title %}{{ data['name'] }} - {{ translations['비슷한 차트들로 본 주가 전망'] }}{% endblock %}
+{% block og_image %}{{ url_for('static', filename='image_data/static_image/gauge/gauge_' + gauge_name + '.png') }}{% endblock %}
+{% block og_description %}{{ data['name'] }}{{ translations['의 주가는 이후 상승할까요?'] }}{% endblock %}
+{% block description %}{{ data['name'] }}{{ translations['의 주가는 이후 상승할까요?'] }}{% endblock %}
+{% block content %}
+<!DOCTYPE html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table2.css') }}">
+    <script src="{{ url_for('static', filename='js/share.js') }}"></script>
+    <!-- 공유 기능 데이터 설정 -->
+    <script type="text/javascript">
+        var shareData = {
+            title: "{{ translations['비슷한 차트 검색'] }} - {{ data['name'] }} {{ translations['차트 평가'] }}",
+            description: "{{ data['name'] }}{{ translations['의 주가는 이후 상승할까요?'] }}",
+            imageUrl: "{{ url_for('static', filename='image_data/static_image/gauge/gauge_' + gauge_name + '.png')|safe }}",
+            url: "{{ request.url|safe }}"
+        };
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <div class='row justify-content-center'>
+            <h3 style="text-align: center"><b>{{ translations['비슷한 차트 탐색 결과'] }}</b></h3>
+        </div>
+        <div class="row justify-content-center" style="margin-top: 25px;">
+            <a class="invalid_button disabled" style="font-size:15px; padding:11px 11px;" onclick="event.preventDefault();" href="#">{{ translations['종합'] }}</a>
+        </div>
+        {% if valid_day_num %}
+        <div class="row justify-content-center" style="margin-top: 30px;">
+            {% set text = {"128": "128", "64": "6&nbsp;4", "32": "3&nbsp;2", "16": "1&nbsp;6", "8": "&nbsp;8&nbsp;"} %}
+            {% for num in ['128', '64', '32', '16', '8'] %}
+            <div class="col-2 text-center">
+                {% if num not in valid_day_num or num == day_num %}
+                <!-- num이 valid_day_num에 포함되지 않거나, num이 day_num과 같은 경우 a태그 비활성화 -->
+                <a class="invalid_button disabled" onclick="event.preventDefault();" href="#">{{ text[num]|safe }}</a>
+                {% else %}
+                <!-- 그 외의 경우 a태그 활성화 -->
+                <a href="{{ url_for('result.result', **{
+                    'code': data['code'],
+                    'base_date': data['date'],
+                    'market': market,
+                    'day_num': num,
+                    'lang': lang
+                    }) }}" onclick="LoadingWithMask();" class="day_num_button">  
+                    {{ text[num]|safe }}</a>              
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <hr>
+        <div class="row" style="margin-top: 10px;">
+            <div class="col-4 d-flex align-items-center">
+                <a href="{{ naver_url }}" target="_blank">
+                    <img src="{{ url_for('static', filename='image_data/static_image/naver.png') }}" style="width: 40px; height: 40px;" class="text-left" alt="naver" />
+                </a>
+                {% if lang == 'en' and market == 'nyse_naq' %}
+                <a href="https://finance.yahoo.com/quote/{{ data['code'] }}" target="_blank" style="margin-left: 10px;">
+                    <img src="{{ url_for('static', filename='image_data/static_image/yahoo.jpg') }}" style="width: 40px; height: 40px;" class="text-left" alt="yahoo" />
+                </a>
+                {% endif %}
+            </div>
+            <div class="col-8 tooltip-container">
+                <p class="text-right ml-auto" style="font-size: 0.8em; margin-top: -5px; white-space: nowrap;">
+                    ※ <span class="update_date">{{ translations['업데이트 날짜'] }}</span> : {{ update_date }}
+                    <span class="tooltip-icon day_num_button" style="font-size:10px; padding:2px 6px;" onclick="toggleTooltip('tooltip_update_date')">?</span>
+                </p>
+                <div class="tooltip-text" id="tooltip_update_date">
+                    <span>{{ translations['매일 장 종료 후 3시간 이내에 모든 최신 데이터가 업데이트됩니다.'] }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="justify-content-center text-center" style="margin-top: 32px;">
+            {% if user_agent == "SimilarChartFinder/1.0/dev" or user_agent == "SimilarChartFinder/1.0"%}
+            <h4 style="text-align: center; display: inline-block;">
+                {% if lang == 'en' and market == 'nyse_naq' %}
+                <a href="https://finance.yahoo.com/quote/{{ data['code'] }}" target="_blank" class="yahoo">
+                    <b>{{ data['name'] }}</b> ({{ data['code'] }})
+                </a>
+                {% else %}
+                <a href="{{ naver_url }}" target="_blank" class="naver">
+                    <b>{{ data['name'] }}</b> ({{ data['code'] }})
+                </a>
+                {% endif %}
+            </h4>
+            {% else %}
+            <h4 style="text-align: center"><b>{{ data['name'] }}</b> ({{ data['code'] }})</h4>
+            {% endif %}
+            <div class="tooltip-container">
+                <div class="row">
+                    <h6 style="text-align: center">{{ translations['과거 비슷한 차트'] }} <b>{{ data['data_num_allday'] }}</b>{{ translations['개로 본 향후 추이'] }}</h6>
+                    <p class="tooltip-icon day_num_button" style="margin-left: 5px; font-size:10px; padding:2px 6px;" onclick="toggleTooltip('tooltip_data_num')">?</p>
+                </div>
+                <div class="tooltip-text" id="tooltip_data_num" style="width: 230px;">
+                    <span>
+                        8{{ translations['거래일치 비교'] }} : <b>{{ data['data_num_8day'] }}</b><br>
+                        16{{ translations['거래일치 비교'] }} : <b>{{ data['data_num_16day'] }}</b><br>
+                        32{{ translations['거래일치 비교'] }} : <b>{{ data['data_num_32day'] }}</b><br>
+                        64{{ translations['거래일치 비교'] }} : <b>{{ data['data_num_64day'] }}</b><br>
+                        128{{ translations['거래일치 비교'] }} : <b>{{ data['data_num_128day'] }}</b>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center">
+            <img src="{{ url_for('static', filename='image_data/' + market + '/main_chart/change_' + data['code'] + '_' + lang + '.png') }}" class="img-fluid" alt="gauge_img" />
+        </div>
+        <div class="col-12 row justify-content-center">
+            {% if data['average_allday'] != None %}
+            <p class="text-center" style="font-size: 0.9em;"><span class="result_average">{{ translations['비슷한 차트들의 향후 평균2'] }}</span> : 
+                {% if lang == 'ko' %}
+                <b class="{{ 'red' if data['average_allday'] >= 0 else 'blue' }}">{{ data['average_allday']|round(2) }}% {{ '▲' if data['average_allday'] >= 0 else '▼' }}</b>
+                {% else %}
+                <b class="{{ 'green' if data['average_allday'] >= 0 else 'red' }}">{{ data['average_allday']|round(2) }}% {{ '▲' if data['average_allday'] >= 0 else '▼' }}</b>
+                {% endif %}
+            </p>
+            {% endif %}
+        </div>
+        <!-- 상단2 -->
+        {% if user_agent != "SimilarChartFinder/1.0/dev" %}
+        <div style="margin-top: 10px; margin-bottom: 10px;">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7879029685491158"
+                crossorigin="anonymous"></script>
+            <ins class="adsbygoogle"
+                style="display:block; height:90px;"
+                data-ad-client="ca-pub-7879029685491158"
+                data-ad-slot="3873312112"
+                data-ad-format="horizontal"
+                data-full-width-responsive="false"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+        {% endif %}
+        <div class="justify-content-center" style="margin-top: 30px;">
+            <h4 style="text-align: center" class="mt-3"><b>{{ translations['차트 평가'] }}</b></h4>
+            {% if not none_result and data['data_num_allday'] >= 45 %}
+            <div class="mt-1" style="display: flex; justify-content: center;">
+                <p class="text-center" style="border: 2px solid black; padding: 10px; display: inline-block;; margin: 10px; text-align: center;">{{ analysis }}</p>
+            </div>
+            {% endif %}
+            <div class="d-flex justify-content-center">
+                <img src="{{ url_for('static', filename='image_data/static_image/gauge/gauge_' + gauge_name + '.png') }}" class="img-fluid" alt="gauge_img" />
+            </div>
+            <div class="justify-content-center text-center" style="margin-top: 5px;">
+                {% if none_result %}
+                <p class="text-center">{{ translations['해당 차트와 비슷한 과거 차트가 존재하지 않습니다.'] }}</p>
+                {% else %}
+                    {% if data['data_num_allday'] < 45 %}
+                    <p class="text-center" style="font-size: 0.85em;"><b class="none_info1">{{ translations['차트 평가가 제공되지 않습니다.(비슷한 차트 45개 미만 or 잦은 거래정지)'] | safe}}</b></p>
+                    {% else %}
+                    <div class="tooltip-container">
+                        <p class="text-center" style="font-size: 0.85em;">
+                            <span class="text-center" style="font-size: 0.85em;"><b>{{ translations['점수'] }}</b> : {% if lang == 'ko' %}<b class="{{ 'red' if data['average_allday'] >= 0 else 'blue' }}">{% else %}<b class="{{ 'green' if data['average_allday'] >= 0 else 'red' }}">{% endif %}
+                                {{ data['average_allday']|round(2) }}</b> X 0.7 
+                                {% if data['rise_rate_allday'] >= 60 %}
+                                + (<b class="{{ 'red' if lang == 'ko' else 'green' }};">{{ data['rise_rate_allday'] }}</b>
+                                {% elif data['rise_rate_allday'] <= 40 %}
+                                + (<b class="{{ 'blue' if lang == 'ko' else 'red' }};">{{ data['rise_rate_allday'] }}</b>
+                                {% else %}
+                                + (<b>{{ data['rise_rate_allday'] }}</b>
+                                {% endif %} - 50) X 0.2 + ({{ average_dif }}) = 
+                                {% if score > 5 %}
+                                <b class="{{ 'red' if lang == 'ko' else 'green' }};">{{ score }}</b>
+                                {% elif score < -5 %}
+                                <b class="{{ 'blue' if lang == 'ko' else 'red' }};">{{ score }}</b>
+                                {% else %}
+                                <b>{{ score }}</b>
+                                {% endif %}
+                            </span>
+                            <span class="tooltip-icon day_num_button" style="margin-left: 5px; font-size:10px; padding:2px 6px;" onclick="toggleTooltip('tooltip_score')">?</span>
+                        </p>
+                        <div class="tooltip-text" id="tooltip_score">
+                            <span><b>{{ translations['향후 평균'] }}</b> X 0.7 + (<b>{{ translations['상승차트비율'] }}</b> - 50) X 0.2 + (<b>{{ translations['전 종목 평균 점수'] }}</b>)</span>
+                            <br>
+                            <span>{{ translations['10 거래일 후 상승 확률'] }}</span>
+                            <span style="white-space: nowrap;">{{ translations['점수'] }} 
+                                <b class="{{ 'blue' if lang == 'ko' else 'red' }}" style="white-space: nowrap;">-4</b> 
+                                {{ translations['이하'] }} : 
+                                <b class="{{ 'blue' if lang == 'ko' else 'red' }}" style="white-space: nowrap;">
+                                    {{ range_low | round(2) }}
+                                </b>%
+                            </span>
+                            <span style="white-space: nowrap;">{{ translations['점수'] }} 
+                                <b class="{{ 'red' if lang == 'ko' else 'green' }}" style="white-space: nowrap;">6</b> 
+                                {{ translations['이상'] }} : 
+                                <b class="{{ 'red' if lang == 'ko' else 'green' }}" style="white-space: nowrap;">
+                                    {{ range_high | round(2) }}
+                                </b>%
+                            </span>
+                            <br>
+                            <span><a href="{{ url_for('validation.validation', lang=lang)}}" onclick="LoadingWithMask();">>> {{ translations['점수 구간별 확률 자세히 보기'] }}</a></span>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <figure class="mx-3">
+                <img src="{{ url_for('static', filename='image_data/' + market + '/main_chart/change2_' + data['code'] + '_' + lang + '.png') }}" 
+                class="img-fluid" style="border: 2px solid; border-color: black; width: 144px; height: 144px;" alt="{{ num }}" />
+                {% if data['average_allday'] != None %}
+                    {% if data['average_allday'] >= 0 %}
+                    <figcaption class="text-center" style="font-size: 13px; color: black;">
+                        {{ translations['비슷한 차트들의 향후 평균'] | safe }}<br>
+                        <span class="{{ 'red' if lang == 'ko' else 'green' }}" style="font-weight: bold; font-size: 20px">{{ data['average_allday']|round(2) }}% ▲</span>
+                    </figcaption>
+                    {% elif data['average_allday'] < 0 %} 
+                    <figcaption class="text-center" style="font-size: 13px; color: black;">
+                        {{ translations['비슷한 차트들의 향후 평균'] | safe }}<br>
+                        <span class="{{ 'blue' if lang == 'ko' else 'red' }}" style="font-weight: bold; font-size: 20px">{{ data['average_allday']|round(2) }}% ▼</span>
+                    </figcaption>
+                    {% endif %}
+                {% else %}
+                <figcaption class="text-center none_info2" style="font-size: 15px; color: gray; font-weight: bold;">{{ translations['정보없음'] }} (0 / 0)</figcaption>
+                {% endif %}
+            </figure>
+            <figure class="mx-3">
+                <img src="{{ url_for('static', filename='image_data/' + market + '/main_chart/ratio_' + data['code'] + '_' + lang + '.png') }}" 
+                class="img-fluid" style="border: 2px solid; border-color: black; width: 144px; height: 144px;" alt="{{ num }}" />
+                {% if data['rise_rate_allday'] != None %}
+                    {% if data['rise_rate_allday'] >= 60 %}
+                    <figcaption class="text-center" style="font-size: 13px; color: black;">
+                        {{ translations['상승차트비율'] }}<br>
+                        ({{ data['rise_count_allday'] }} / {{ data['data_num_allday'] }})<br>
+                        <span class="{{ 'red' if lang == 'ko' else 'green' }}" style="font-weight: bold; font-size: 20px">{{ data['rise_rate_allday'] }}%</span>
+                    </figcaption>
+                    {% elif data['rise_rate_allday'] <= 40 %} 
+                    <figcaption class="text-center" style="font-size: 13px; color: black;">
+                        {{ translations['상승차트비율'] }}<br>
+                        ({{ data['rise_count_allday'] }} / {{ data['data_num_allday'] }})<br>
+                        <span class="{{ 'blue' if lang == 'ko' else 'red' }}" style="font-weight: bold; font-size: 20px">{{ data['rise_rate_allday'] }}%</span>
+                    </figcaption>   
+                    {% else %}
+                    <figcaption class="text-center" style="font-size: 13px; color: black;">
+                        {{ translations['상승차트비율'] }}<br>
+                        ({{ data['rise_count_allday'] }}/{{ data['data_num_allday'] }})<br>
+                        <span style="font-size: 20px"><b>{{ data['rise_rate_allday'] }}%</b></span>
+                    </figcaption>
+                    {% endif %}
+                {% else %}
+                <figcaption class="text-center none_info2" style="font-size: 15px; color: gray; font-weight: bold;">{{ translations['정보없음'] }} (0 / 0)</figcaption>
+                {% endif %}
+            </figure>
+        </div>
+        <!-- <div class='justify-content-center' style="margin-top: 30px;">
+            <p class="text-center"><b>{{ analysis }}</b></p>
+        </div> -->
+        <!-- 상단3 -->
+        {% if user_agent != "SimilarChartFinder/1.0/dev" %}
+        <div style="margin-top: 30px; margin-bottom: 10px;">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7879029685491158"
+                crossorigin="anonymous"></script>
+            
+            <ins class="adsbygoogle"
+                style="display:block; height:90px;"
+                data-ad-client="ca-pub-7879029685491158"
+                data-ad-slot="7641694364"
+                data-ad-format="horizontal"
+                data-full-width-responsive="false"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+        {% endif %}
+        <hr>
+        <div class="mt-5 row justify-content-center">
+            <h4 style="text-align: center"><b>{{ translations['상세 비교'] }}</b></h4>
+        </div>
+        <div class="mt-3 row justify-content-center">
+            {% for num in ['128', '64', '32', '16', '8'] %}
+            {% set average = 'average_' + num + 'day' %}
+            {% set rise_count = 'rise_count_' + num + 'day' %}
+            {% set data_num = 'data_num_' + num + 'day' %}
+
+            {% if data[data_num] != 0 %} <!-- 상승종목수의 글자색을 위한 코드 -->
+                {% set ratio = data[rise_count] / data[data_num] %}
+            {% else %}
+                {% set ratio = 0 %}
+            {% endif %}
+
+            {% if (ratio >= 0.7 and lang == 'ko') or (ratio <= 0.3 and lang == 'en') %}
+                {% set color = 'red' %}
+            {% elif ratio <= 0.3 and lang == 'ko' %}
+                {% set color = 'blue' %}
+            {% elif ratio >= 0.3 and lang == 'en' %}
+                {% set color = 'rgb(0, 170, 0)' %}
+            {% else %}
+                {% set color = 'black' %}
+            {% endif %}
+
+            {% if data[average] != None %}
+            <a href="{{ url_for('result.result', **{
+                'code': data['code'],
+                'base_date': data['date'],
+                'market': market,
+                'day_num': num,
+                'lang': lang
+                }) }}" onclick="LoadingWithMask();">
+            {% else %}
+            <a href="#" onclick="event.preventDefault();">
+            {% endif %}
+                <figure class="mx-3">
+                    <img src="{{ url_for('static', filename='image_data/cache/' + data['code'] + '_' + data['date'] + '_' + num + '_' + lang + '.png') }}" 
+                    class="img-fluid" style="border: 2px solid; border-color: black; width: 144px; height: 144px;" alt="{{ num }}" />
+                    {% if data[average] != None %}
+                        {% if data[average] >= 0 %}
+                        <figcaption class="text-center" style="font-size: 13px; color: black;">
+                            {{ num }}<span class="day_num">{{ translations['일치 평균'] }} : </span><span class="{{ 'red' if lang == 'ko' else 'green' }}" style="font-weight: bold;">{{ data[average]|round(2) }}% ▲</span>
+                            <br><span class="rise_count">{{ translations['상승종목'] }}</span> : <span style="color: {{ color }}; font-weight: bold;">{{ data[rise_count] }}</span> / {{ data[data_num] }}</figcaption>
+                        {% elif data[average] < 0 %} 
+                        <figcaption class="text-center" style="font-size: 13px; color: black;">
+                            {{ num }}<span class="day_num">{{ translations['일치 평균'] }} : </span><span class="{{ 'blue' if lang == 'ko' else 'red' }}" style="font-weight: bold;">{{ data[average]|round(2) }}% ▼</span>
+                            <br><span class="rise_count">{{ translations['상승종목'] }}</span> : <span style="color: {{ color }}; font-weight: bold;">{{ data[rise_count] }}</span> / {{ data[data_num] }}</figcaption>
+                        {% endif %}
+                    {% else %}
+                    <figcaption class="text-center none_info2" style="font-size: 13px; color: gray; font-weight: bold;">{{ num }} : {{ translations['정보없음'] }} (0 / 0)</figcaption>
+                    {% endif %}
+                </figure>
+            </a>
+            {% endfor %}
+        </div>
+        <div class="mt-1 row justify-content-center">
+            <p class="chart_img_info text-center">{{ translations['차트 이미지를 클릭하면 비슷한 차트들을 볼 수 있습니다.'] }}</p>
+        </div>
+        <div>
+            <p class="text-center mt-3"><a href="{{ url_for('statistics.statistics', lang=lang)}}" onclick="LoadingWithMask();">
+                >> {{ translations['가장 평가가 좋은 종목 보기'] }}</a></p>
+            <p class="text-center mt-3"><a href="{{ url_for('validation.validation', lang=lang)}}" onclick="LoadingWithMask();">
+                >> {{ translations['검증 결과 확인하기'] }}</a></p>
+            <p class="text-center mt-3 warning">{{ translations['단순히 과거 비슷한 차트를 기반으로 분석한 것으로 투자의 책임은 <b>투자자 본인</b>에게 있습니다.'] | safe}}</p>
+        </div>
+        <!-- 상단4 -->
+        {% if user_agent != "SimilarChartFinder/1.0/dev" %}
+        <div style="margin-top: 30px; margin-bottom: 30px;">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7879029685491158"
+                crossorigin="anonymous"></script>
+                
+            <ins class="adsbygoogle"
+                style="display:block; height:90px;"
+                data-ad-client="ca-pub-7879029685491158"
+                data-ad-slot="7540160542"
+                data-ad-format="horizontal"
+                data-full-width-responsive="false"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+        {% endif %}
+        <!-- <div class="row justify-content-center" style="overflow-x: auto; margin-top: 50px;">
+            <table class="table" style="width: 100%; table-layout: fixed;">
+                <colgroup>
+                    <col style="width: 50%;">
+                    <col style="width: 50%;">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="item_name">{{ translations['현재 지표'] }}</th>
+                        <th class="item_name">{{ translations['5일 후 상승해있을 확률'] }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in indicator %}
+                    <tr>
+                        <td>
+                            {{ row['name'] }} : <b style="white-space: normal;">
+                                {% if row['value'] >= 100 - row['color_limit'] %}
+                                <b style="color: {{ 'red' if lang == 'ko' else 'rgb(0, 170, 0)' }};">{{ row['value'] }}%</b>
+                                {% elif row['value'] <= row['color_limit'] %}
+                                <b style="color: {{ 'blue' if lang == 'ko' else 'red' }};">{{ row['value'] }}</b>
+                                {% else %}
+                                {{ row['value'] }}
+                                {% endif %}
+                            </b>
+                        </td>
+                        <td>
+                            {% if row['rise_rate'] >= 55 %}
+                            <b style="color: {{ 'red' if lang == 'ko' else 'rgb(0, 170, 0)' }};">{{ row['rise_rate'] }}%</b>
+                            {% elif row['rise_rate'] <= 45 %}
+                            <b style="color: {{ 'blue' if lang == 'ko' else 'red' }};">{{ row['rise_rate'] }}%</b>
+                            {% else %}
+                            <b>{{ row['rise_rate'] }}%</b>
+                            {% endif %}
+                            <br><span style="font-size: 10px">({{ row['rise_count'] }}/{{ row['total_count'] }})</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p class="text-right mt-1 ml-auto">
+                ※ <b>{{ translations['다양한 지표 추가 예정'] }}</b>
+            </p>
+        </div> -->
+        <div class="row justify-content-center" style="overflow-x: auto; margin-top: 100px; margin-bottom: 50px; margin-left: 10px; margin-right: 10px;">
+            <table class="related-items-table" style="width: 100%; table-layout: fixed;">
+                <colgroup>
+                    <col style="width: 33%;">
+                    <col style="width: 34%;">
+                    <col style="width: 33%;">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th colspan="5"><b>{{ translations['관련 종목'] }}</b></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    {% for row in same_industry %}
+                        {% if loop.index0 is divisibleby 3 and loop.index0 != 0 %}
+                            </tr><tr>
+                        {% endif %}
+                        {% if lang == 'ko' %}
+                        <td class="{% if row['average'] > 0 %}red{% elif row['average'] < 0 %}blue{% endif %}" 
+                            onclick="LoadingWithMask(); window.location.href='{{ url_for('stock.stock', code=row['code'], lang=lang) }}'">
+                            {{ row['name'] }}</td>
+                        {% else %}
+                        <td class="{% if row['average'] > 0 %}green{% elif row['average'] < 0 %}red{% endif %}" 
+                            onclick="LoadingWithMask(); window.location.href='{{ url_for('stock.stock', code=row['code'], lang=lang) }}'">
+                            {{ row['name'] }}</td>
+                        {% endif %}
+                    {% endfor %}
+                    </tr>
+                </tbody>                
+            </table>
+        </div>
+        {% if lang == 'ko' or market == 'kospi_daq' %}
+        <div class="mt-3 row justify-content-center">
+            <a href="{{ naver_url }}" target="_blank" style="text-decoration: underline;" 
+            class="naver_info green">
+            {{ translations['네이버 증권 종목정보'] }}</a>
+        </div>
+        {% endif %}
+        {% if lang == 'en' and market == 'nyse_naq' %}
+        <div class="mt-3 row justify-content-center">
+            <a href="https://finance.yahoo.com/quote/{{ data['code'] }}" target="_blank"
+            style="color: purple; text-decoration: underline;" class="investing_info">
+                {{ translations['야후 파이낸스 종목정보'] }}</a>
+        </div>
+        {% endif %}
+        <div class="mt-3 row justify-content-center" style="margin-bottom: 50px;">
+            <a href="{{ investing_url }}" target="_blank" style="color: rgb(67, 67, 67); text-decoration: underline;" 
+            class="investing_info">
+                {{ translations['인베스팅닷컴 종목정보'] }}</a>
+        </div>
+        <hr>
+        <div class="row justify-content-center" style="margin-top: 100px;">
+            <div class="col-3 text-center">
+                <a id="clip-btn" href="{% if user_agent == 'SimilarChartFinder/1.0/dev' or user_agent == 'SimilarChartFinder/1.0' %}javascript:kakaoShare(shareData){% else %}javascript:shareTwitter(shareData){% endif %}">
+                    <figure>
+                        <img src="{{ url_for('static', filename='image_data/static_image/b.png') | safe }}" style="width: 48px; height: 48px; border-radius: 5px;"/>
+                        <figcaption style="color: black;">{{ translations['공유'] }}</figcaption>
+                    </figure>
+                </a>
+            </div>
+            <div class="col-3 text-center">
+                <a id="clip-btn" href="{% if user_agent == 'SimilarChartFinder/1.0/dev' or user_agent == 'SimilarChartFinder/1.0' %}javascript:kakaoShare(shareData){% else %}javascript:shareFacebook(shareData){% endif %}">
+                    <figure>
+                        <img src="{{ url_for('static', filename='image_data/static_image/c.png') | safe }}" style="width: 48px; height: 48px; border-radius: 5px;"/>
+                        <figcaption style="color: black;">{{ translations['공유'] }}</figcaption>
+                    </figure>
+                </a>
+            </div>
+            <div class="col-3 text-center">
+                <a id="kakao-link-btn" href="javascript:kakaoShare(shareData)">
+                    <figure>
+                        <img src="https://developers.kakao.com/assets/img/about/logos/kakaolink/kakaolink_btn_medium.png" style="width: 48px; height: 48px;"/>
+                        <figcaption style="color: black;">{{ translations['공유'] }}</figcaption>
+                    </figure>
+                </a>
+            </div>
+            <div class="col-3 text-center">
+                <a id="clip-btn" href="javascript:clipboardShare()"> 
+                    <figure>
+                        <img src="{{ url_for('static', filename='image_data/static_image/a.png') | safe }}" style="width: 48px; height: 48px; border-radius: 5px;"/>
+                        <figcaption style="color: black;">url {{ translations['복사'] }}</figcaption>
+                    </figure>
+                </a>
+            </div>
+        </div>
+        <div id="loadingcontainer"></div>
+    </div>
+</body>
+</html>
+{% endblock %}

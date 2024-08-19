@@ -1,0 +1,27 @@
+{% macro render_tbody(type, ranking, translations, lang) %}
+<tbody id="tbody_{{ type }}" style="display: {{ 'none' if type != 'popular' else '' }}">
+    {% for row in ranking %}
+    <tr onclick="LoadingWithMask(); window.location.href='{{ url_for('stock.stock', code=row['code'], lang=lang) }}'">
+        <td>
+            <b style="white-space: normal;">{{ loop.index }}. {{ row['name'] }}</b>
+        </td>
+        <td>
+            {% if row['average'] >= 0 %}
+            <b class="{{ 'red' if lang == 'ko' else 'green' }}">{{ row['average'] }}% ▲</b>
+            {% else %}
+            <b class="{{ 'blue' if lang == 'ko' else 'red' }}">{{ row['average'] }}% ▼</b>
+            {% endif %}
+        </td>
+        <td>
+            {% if row['rise_rate'] >= 70 %}
+            <b class="{{ 'red' if lang == 'ko' else 'green' }}">{{ row['rise_rate'] }}%</b>
+            {% elif row['rise_rate'] <= 30 %}
+            <b class="{{ 'blue' if lang == 'ko' else 'red' }}">{{ row['rise_rate'] }}%</b>
+            {% else %}
+            <b>{{ row['rise_rate'] }}%</b>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+{% endmacro %}

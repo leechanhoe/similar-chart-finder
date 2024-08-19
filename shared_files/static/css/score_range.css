@@ -1,0 +1,42 @@
+
+.tr-blue-light {
+    color: rgba(0, 0, 255, 0.8);;
+}
+
+.tr-blue-medium {
+    color: blue;
+    font-weight: 500;
+}
+
+.tr-blue-dark {
+    color: blue;
+    font-weight: 700;
+}
+
+.tr-red-light {
+    color: rgba(255, 0, 0, 0.8);
+}
+
+.tr-red-medium {
+    color: red;
+    font-weight: 500;
+}
+
+.tr-red-dark {
+    color: red;
+    font-weight: 700;
+}
+
+.tr-green-light {
+    color: rgb(0, 170, 0, 0.8);
+}
+
+.tr-green-medium {
+    color: rgb(0, 170, 0);
+    font-weight: 500;
+}
+
+.tr-green-dark {
+    color: rgb(0, 170, 0);
+    font-weight: 700;
+}

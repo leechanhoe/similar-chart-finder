@@ -1,0 +1,125 @@
+.day_num_button {
+	box-shadow:inset 0px 1px 3px 0px #dfdfdf;
+	background:linear-gradient(to bottom, #363436 5%, #717171 100%);
+	background-color:#363436;
+	border-radius:5px;
+	border:1px solid #424242;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Verdana;
+	font-size:12px;
+	font-weight:bold;
+	padding:8px 8px;
+	text-decoration:none;
+}
+.day_num_button:hover {
+	background:linear-gradient(to bottom, #525252 5%, #b8b8b8 100%);
+	background-color:#c0c0c0;
+    color: rgb(219, 219, 219);
+	text-decoration:none;
+}
+.day_num_button:active {
+	position:relative;
+	top:1px;
+}
+
+.invalid_button {
+	box-shadow:inset 0px 1px 3px 0px #383838;
+	background:linear-gradient(to bottom, #ffffff 5%, #eaeaea 100%);
+	background-color:#f0edf0;
+	border-radius:5px;
+	display:inline-block;
+	cursor:pointer;
+	color:#797979;
+	font-family:Verdana;
+	font-size:12px;
+	font-weight:bold;
+	padding:8px 8px;
+	text-decoration:none;
+}
+.invalid_button:hover {
+    color: #797979;
+    text-decoration:none;
+}
+.invalid_button:active {
+	position:relative;
+	top:1px;
+}
+
+.base_search_button {
+    width: 50px; /* 버튼 너비 조정 */
+    height: 50px; /* 버튼 높이 조정 */
+    font-size: 19px; /* 내부 아이콘 크기 조정 */
+    padding: 10px; /* 버튼 내부의 여백 추가 */
+    border-radius: 10px; /* 버튼의 모서리를 둥글게 */
+}
+
+.red_button {
+	box-shadow:inset 0px 1px 3px 0px #dfdfdf;
+	background:linear-gradient(to bottom, #ffffff 5%, #eaeaea 100%);
+	border-radius:5px;
+	border:3px solid #e42020;
+	display:inline-block;
+	cursor:pointer;
+	color:#e42020;
+	font-size:12px;
+	font-weight:bold;
+	padding:2px 2px;
+	text-decoration:none;
+}
+.red_button:hover {
+	background:linear-gradient(to bottom, #f14d4d 5%, #ef6464 100%);
+    color: rgb(219, 219, 219);
+	text-decoration:none;
+}
+.red_button:active {
+	position:relative;
+	top:1px;
+}
+
+.blue_button {
+	box-shadow:inset 0px 1px 3px 0px #dfdfdf;
+	background:linear-gradient(to bottom, #ffffff 5%, #eaeaea 100%);
+	border-radius:5px;
+	border:3px solid #1b18df;
+	display:inline-block;
+	cursor:pointer;
+	color:#1b18df;
+	font-size:12px;
+	font-weight:bold;
+	padding:2px 2px;
+	text-decoration:none;
+}
+.blue_button:hover {
+	background:linear-gradient(to bottom, #4043f0 5%, #5457ec 100%);
+    color: rgb(219, 219, 219);
+	text-decoration:none;
+}
+.blue_button:active {
+	position:relative;
+	top:1px;
+}
+
+.green_button {
+	box-shadow:inset 0px 1px 3px 0px #dfdfdf;
+	background:linear-gradient(to bottom, #ffffff 5%, #eaeaea 100%);
+	border-radius:5px;
+	border:3px solid #1cae19;
+	display:inline-block;
+	cursor:pointer;
+	color:#1cae19;
+	font-size:12px;
+	font-weight:bold;
+	padding:2px 2px;
+	text-decoration:none;
+}
+.green_button:hover {
+	background:linear-gradient(to bottom, #2fc02c 5%, #44c041 100%);
+    color: rgb(219, 219, 219);
+	text-decoration:none;
+}
+.green_button:active {
+	position:relative;
+	top:1px;
+}

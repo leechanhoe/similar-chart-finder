@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block title %}{{ translations['비슷한 차트 검색기'] }}{% endblock %}
+{% block og_title %}{{ translations['비슷한 차트 검색기'] }}{% endblock %}
+{% block og_image %}{{ url_for('static', filename='image_data/static_image/link_logo_' + lang + '.png') }}{% endblock %}
+{% block og_description %}{{ translations['전 종목의 최근 10년간 모든 차트를 탐색합니다.'] }} {{ translations['내 종목의 차트는 과연 상승하는 차트일까요?'] }}{% endblock %}
+{% block description %}{{ translations['전 종목의 최근 10년간 모든 차트를 탐색합니다.'] }} {{ translations['내 종목의 차트는 과연 상승하는 차트일까요?'] }}{% endblock %}
+{% block content %}
+<!DOCTYPE html>
+
+<head>
+</head>
+
+<body>
+    <div class="container">
+        {% if user_agent != "SimilarChartFinder/1.0/dev" and user_agent != "SimilarChartFinder/1.0" and not is_app %}
+            {% from "popup.html" import render_popup %}
+            {{ render_popup(translations, lang) }}
+        {% endif %}
+        <div class="mt-3 row justify-content-center">
+            <img src="{{ url_for('static', filename='image_data/static_image/logo_' + lang + '.ico') }}" 
+                class="img-fluid" style="border: 2px solid; border-color: black; width: 80px; height: 80px;" alt="logo" />
+        </div>
+        <h6 class="mt-5" style="text-align: center"><b>Stock Price Prediction Project</b></h5>
+        <h2 class="mt-3" style="text-align: center"><b>{{ translations['비슷한 차트 검색기'] }}</b></h2>
+        
+        <div class="mt-5 row justify-content-center">
+            <a href="{{ url_for('main_kospi_daq.main_kospi_daq', lang=lang)}}" onclick="LoadingWithMask();">
+                <figure class="mx-4">
+                    <figcaption class="text-center" style="font-size: 20px; color:black"><b class="kospi">{{ translations['코스피'] }}</b></figcaption>
+                    <img src="{{ url_for('static', filename='image_data/kospi_daq/kospi_chart_' + lang + '.png') }}" 
+                    class="img-fluid" style="border: 2px solid; border-color: black; width: 120px; height: 120px;" alt="kospi" />
+                    <figcaption class="text-center" style="font-size: 17px;"><b class="kospi_search">{{ translations['한국주식<br>검색하기'] | safe}}</b></figcaption>
+                </figure>
+            </a>
+            <a href="{{ url_for('main_nyse_naq.main_nyse_naq', lang=lang)}}" onclick="LoadingWithMask();">
+                <figure class="mx-4">
+                    <figcaption class="text-center" style="font-size: 20px; color:black"><b class="nasdaq">{{ translations['나스닥'] }}</b></figcaption>
+                    <img src="{{ url_for('static', filename='image_data/nyse_naq/nasdaq_chart_' + lang + '.png') }}" 
+                    class="img-fluid" style="border: 2px solid; border-color: black; width: 120px; height: 120px;" alt="nasdaq" />
+                    <figcaption class="text-center"style="font-size: 17px;"><b class="nasdaq_search">{{ translations['미국주식<br>검색하기'] | safe}}</b></figcaption>
+                </figure>
+            </a>
+        </div>
+        <div class='justify-content-center' style="margin-top: 100px;">
+            <p class="text-center mt-5 intro1" style="font-size: 1.2em;"><b>{{ translations['전 종목의 최근 10년간 모든 차트를 탐색합니다.'] | safe }}</b></p>
+            <br>
+            <p class="text-center mt-1 intro2">{{ translations["전문가가 '이 차트는 상승하는 차트다.'라고 하던데 진짜 그럴까요?"] }}</p>
+            <p class="text-center mt-1 intro2">{{ translations["상한가, 하한가, 갭, 윗꼬리 등이 발생한 차트들은 이후 어떻게 될까요?"] }}</p>
+            <p class="text-center mt-1 intro2">{{ translations["20일선을 지지한 차트들은 이후 어떻게 될까요?"] }}</p>
+            <p class="text-center mt-1 intro2">{{ translations["8연속 상승/하락한 차트는 이후 어떻게 될까요?"] }}</p>
+            <br>
+            <p class="text-center mt-1 intro2"><b>{{ translations["수백만 개의 차트 중 가장 비슷한 차트를 찾아봅시다."] }}</b></p>
+        </div>
+        <br>
+        <br>
+        <br>
+        <!-- 상단2 -->
+        {% if user_agent != "SimilarChartFinder/1.0/dev" %}
+        <div>
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7879029685491158"
+                crossorigin="anonymous"></script>
+            <ins class="adsbygoogle"
+                style="display:block; height:90px;"
+                data-ad-client="ca-pub-7879029685491158"
+                data-ad-slot="3873312112"
+                data-ad-format="horizontal"
+                data-full-width-responsive="false"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+        {% endif %}
+        <br>
+        <br>
+        <br>
+        <div class='justify-content-center'>
+            <h3 style="text-align: center"><b>{{ translations['주식매매를 위한 필수 보조지표'] }}</b></h3>
+            <h6 style="text-align: center"><b>{{ translations["과거 비슷한 차트들로 학습하는 주가예측 AI의 전신"] }}</b></h6>
+            <p class="text-center mt-5 intro2">{{ translations['최근 차트를 활용한 알고리즘 매매가 늘고 있어 차트 분석이 중요성이 커지고 있습니다.'] }}</p>
+            <div class="mt-5 row justify-content-center">
+                <figure class="mx-1">
+                    <img src="{{ url_for('static', filename='image_data/static_image/gauge/gauge_8.0_' + lang + '.png') }}" class="img-fluid" style="border: 2px solid; border-color: black; width: 283px; height: 161px;" alt="삼영엠텍" />
+                    <figcaption class="text-center">
+                        <div class="tooltip-container">
+                            <b style="font-size: 13px;">{{ translations['차트 평가'] }}</b>
+                            <span class="tooltip-icon day_num_button" style="margin-left: 5px; font-size:10px; padding:2px 6px;" onclick="toggleTooltip('tooltip_score')">?</span>
+                            <div class="tooltip-text" id="tooltip_score">
+                                <span>{{ translations['10 거래일 후 상승 확률'] }}</span><br>
+                                <span style="white-space: nowrap;">{{ translations['점수'] }} 
+                                    <b class="{{ 'blue' if lang == 'ko' else 'red' }}" style="white-space: nowrap;">-4</b> 
+                                    {{ translations['이하'] }} : 
+                                    <b class="{{ 'blue' if lang == 'ko' else 'red' }}" style="white-space: nowrap;">
+                                        {{ range_low | round(2) }}
+                                    </b>%
+                                </span>
+                                <span style="white-space: nowrap;">{{ translations['점수'] }} 
+                                    <b class="{{ 'red' if lang == 'ko' else 'green' }}" style="white-space: nowrap;">6</b> 
+                                    {{ translations['이상'] }} : 
+                                    <b class="{{ 'red' if lang == 'ko' else 'green' }}" style="white-space: nowrap;">
+                                        {{ range_high | round(2) }}
+                                    </b>%
+                                </span>
+                                <br>
+                                <span><a href="{{ url_for('validation.validation', lang=lang)}}" onclick="LoadingWithMask();">>> {{ translations['점수 구간별 확률 자세히 보기'] }}</a></span>
+                            </div>
+                        </div>
+                    </figcaption>
+                </figure>
+            </div>
+            <p class="text-center mt-1 intro2">{{ translations['과거 비슷한 차트를 기반으로 향후 추이를 평가합니다.'] }}</p>
+            <p class="text-center mt-1 intro2">{{ translations['약 6달 치의 장기적 관점부터 8거래일치의 단기적 관점까지 모두 고려합니다.'] }}</p>
+            <br>
+            <p class="text-center mt-1 intro2" style="font-size: 1.1em;">
+                {{ translations['실제 검증 결과, 비슷한 차트들이 상승하면 실제 상승확률도 높아집니다.'] | safe }}
+            </p>
+            <p class="text-center mt-1 intro2"">
+                <a href="{{ url_for('validation.validation', lang=lang)}}" onclick="LoadingWithMask();">
+                    >> {{ translations['검증 결과 확인하기'] }}
+                </a>
+            </p>
+            <br>
+            <br>
+            <p class="text-center mt-1 intro2" style="font-size: 1.25em;"><b>{{ translations["내 종목의 차트는 과연 상승하는 차트일까요?"] }}</b></p>
+        </div>
+        <br>
+        <br>
+        <br>
+        <!-- 상단3 -->
+        {% if user_agent != "SimilarChartFinder/1.0/dev" %}
+        <div>
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7879029685491158"
+                crossorigin="anonymous"></script>
+            
+            <ins class="adsbygoogle"
+                style="display:block; height:90px;"
+                data-ad-client="ca-pub-7879029685491158"
+                data-ad-slot="7641694364"
+                data-ad-format="horizontal"
+                data-full-width-responsive="false"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+        {% endif %}
+        <br>
+        <br>
+        <br>
+        <div class='justify-content-center' style="margin-bottom: 70px;">
+            <br>
+            <div class="row justify-content-center">
+                <figure class="mx-1">
+                    <img src="{{ url_for('static', filename='image_data/static_image/badge.jpg') }}" 
+                        class="img-fluid" style="width: 256px; height: 256px; border-radius:40px;" alt="badge" />
+                        <figcaption class="text-center" style="font-size: 13px;"><b>{{ translations['지속적인 실현손익 상위 5% 이내 유지 비법'] | safe}}</b></figcaption>
+                </figure>
+                <figure class="mx-1">
+                    <img src="{{ url_for('static', filename='image_data/static_image/contest.jpg') }}" 
+                        class="img-fluid" style="width: 256px; height: 256px; border-radius:40px;" alt="badge" />
+                        <figcaption class="text-center" style="font-size: 13px;"><b>{{ translations['토스증권 실전투자대회 상위 1.5% 마감'] | safe}}</b></figcaption>
+                </figure>
+            </div>
+            {% if user_agent != "SimilarChartFinder/1.0/dev" and user_agent != "SimilarChartFinder/1.0" and not is_app %}
+            <br>
+            <br>
+            <br>
+            <p class="text-center mt-1 intro2" style="font-size: 1.25em;"><b>{{ translations["비슷한 차트 검색기 앱 출시!"] | safe}}</b></p>
+            <p class="text-center intro2" style="font-size: 0.75em;">{{ translations["현재 안드로이드만 지원합니다"] | safe}}</p>
+            <div class="mt-1 row justify-content-center">
+                <figure class="mx-1">
+                    <img src="{{ url_for('static', filename='image_data/static_image/app_img1_' + lang + '.jpg') }}" 
+                    class="img-fluid" style="width: 251px; height: 464px;" alt="app_img1" />
+                    <figcaption class="text-center" style="font-size: 17px;">{{ translations['드로잉검색 지원'] | safe}}</figcaption>
+                </figure>
+                <figure class="mx-1">
+                    <img src="{{ url_for('static', filename='image_data/static_image/app_img2_' + lang + '.jpg') }}" 
+                    class="img-fluid" style="width: 251px; height: 464px;" alt="app_img2" />
+                    <figcaption class="text-center"style="font-size: 17px;">{{ translations['증권 연동'] | safe}}</figcaption>
+                </figure>
+                <figure class="mx-1">
+                    <img src="{{ url_for('static', filename='image_data/static_image/app_img3_' + lang + '.jpg') }}" 
+                    class="img-fluid" style="width: 251px; height: 464px;" alt="app_img3" />
+                    <figcaption class="text-center" style="font-size: 17px;">{{ translations['캔들패턴검색 지원'] | safe}}</figcaption>
+                </figure>
+            </div>
+            {% endif %}
+        </div>
+        <div id="loadingcontainer"></div>
+    </div>
+</body>
+</html>
+{% endblock %}

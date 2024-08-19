@@ -1,0 +1,160 @@
+{% macro render_popup(translations, lang) %}
+<style>
+    /* 오늘 하루 보지 않기 팝업 */
+button {
+  border: 0;
+  background: none;
+  cursor:pointer;
+}
+
+.main_popup {
+  position: fixed;
+  z-index: 1005;
+  -webkit-box-shadow: 0px 13px 40px -6px #061626;
+  box-shadow: 0px 13px 40px -6px #061626;
+  top: 50px;
+  left: 50px;
+  display: none;
+
+  &.on {
+    display: block;
+    background-color: #fff;
+  }
+
+  .img_wrap {
+    width: 100%;
+    height: 150px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  }
+
+  .btn_close {
+    width: 32px;
+    height: 32px;
+    position: absolute;
+    top: 17px;
+    right: 17px;
+    font-size: 0;
+    border: 0;
+    background: none;
+
+    &::before {
+      content: "";
+      width: 2px;
+      height: 32px;
+      background-color: #333;
+      position: absolute;
+      top: 0;
+      left: 15px;
+      transform: rotate(45deg);
+    }
+    &::after {
+      content: "";
+      width: 32px;
+      height: 2px;
+      background-color: #333;
+      position: absolute;
+      top: 15px;
+      left: 0;
+      transform: rotate(45deg);
+    }
+  }
+
+  .btn_today_close {
+    width: 100%;
+    height: 45px;
+    background-color: #333;
+    text-align: center;
+    color: #fff;
+    font-size: 14px;
+    display: block;
+    span {
+      display: block;
+      line-height: 40px;
+      vertical-align: bottom;
+      opacity: 0.8;
+    }
+  }
+}
+</style>
+<script>
+    var toggleMainPopup = function() {
+    
+    /* 스토리지 제어 함수 정의 */
+    var handleStorage = {
+        // 스토리지에 데이터 쓰기(이름, 만료일)
+        setStorage: function (name, exp) {
+        // 만료 시간 구하기(exp를 ms단위로 변경)
+        var date = new Date();
+        date = date.setTime(date.getTime() + exp * 24 * 60 * 60 * 1000);
+
+        // 로컬 스토리지에 저장하기
+        // (값을 따로 저장하지 않고 만료 시간을 저장)
+        localStorage.setItem(name, date)
+        },
+        // 스토리지 읽어오기
+        getStorage: function (name) {
+        var now = new Date();
+        now = now.setTime(now.getTime());
+        // 현재 시각과 스토리지에 저장된 시각을 각각 비교하여
+        // 시간이 남아 있으면 true, 아니면 false 리턴
+        return parseInt(localStorage.getItem(name)) > now
+        }
+    };
+    
+    
+    // 쿠키 읽고 화면 보이게
+    if (handleStorage.getStorage("today")) {
+        $(".main_popup").removeClass("on");
+    } else {
+        $(".main_popup").addClass("on");
+    }
+
+    // 오늘하루 보지 않기 버튼
+    $(".main_popup").on("click", ".btn_today_close", function () {
+        // 로컬 스토리지에 today라는 이름으로 1일(24시간 뒤) 동안 보이지 않게
+        handleStorage.setStorage("today", 1);
+        $(this).parents(".main_popup.on").removeClass("on");
+    });
+
+    // 일반 닫기 버튼
+    $(".main_popup").on("click", ".btn_close", function () {
+        $(this).parents(".main_popup.on").removeClass("on");
+    });
+    }
+
+    $(function() {
+    toggleMainPopup();
+    });
+</script>
+
+<div class="main_popup" >
+    <div class="layer_cont">
+        <div class="img_wrap justify-content-center">
+            <div class="row justify-content-center">
+                <figure class="mx-1">
+                    <img src="{{ url_for('static', filename='image_data/static_image/logo_' + lang + '_1024.png') }}" 
+                        class="img-fluid" style="width: 100px; height: 100px;" alt="badge" />
+                    <figcaption class="text-center" style="font-size: 10px;"><b>{{ translations['비슷한 차트 검색기'] | safe}}</b></figcaption>
+                </figure>
+            </div>
+        </div>
+        <div class="justify-content-center">
+            <p class="text-center mt-1" style="font-size: 1.2em;" style="font-weight: 900;"><b>{{ translations["안드로이드 앱 출시"] | safe}}</b></p>
+            <br>
+            <p class="text-center mt-1" style="font-size: 0.8em;">※ {{ translations["드로잉검색, 캔들패턴검색 지원 - 직접 원하는 차트를 그려보세요!"] | safe}}</p>
+            <p class="text-center mt-1" style="font-size: 0.8em;"><b>※ {{ translations["증권과 함께 비슷한 차트를 확인해보세요!"] | safe}}</b></p>
+            <a href="https://play.google.com/store/apps/details?id=com.similarchart.chartfinder" target="_blank">
+              <p class="text-center mt-1 intro2"><b>>> {{ translations["앱 다운로드하기"] | safe}}</b></p>
+            </a>
+          </div>        
+        <div class="btn_wrap">
+            <!-- 오늘 하루 보지 않기 --->
+            <button class="btn_today_close"><span>{{ translations["오늘 하루 보지 않기"] | safe}}</span></button>
+            <!-- 그냥 닫기 --->
+            <button class="btn_close">close</button>
+        </div>
+    </div>
+</div>
+{% endmacro %}

@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% block title %}{{ name }} - {{ translations['비슷한 차트 검색 결과'] }}{% endblock %}
+{% block og_title %}{{ name }} - {{ translations['비슷한 차트 검색 결과'] }}{% endblock %}
+{% block og_image %}{{ url_for('static', filename='image_data/' + market + '/' + base_date + '/compare_chart_' + code + '_' + base_date + '_' + day_num + '_' + lang + '.png') }}{% endblock %}
+{% block og_description %}{{ translations['의 차트와 가장 비슷한 차트는'] }}{{ name }}{{ translations['?'] }}{% endblock %}
+{% block description %}{{ translations['의 차트와 가장 비슷한 차트는'] }}{{ name }}{{ translations['?'] }}{% endblock %}
+{% block content %}
+<!DOCTYPE html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
+    <script src="{{ url_for('static', filename='js/share.js') }}"></script>
+    <!-- 공유 기능 데이터 설정 -->
+    <script type="text/javascript">
+        var shareData = {
+            title: "{{ translations['비슷한 차트 검색 결과'] }} - {{ name }}",
+            description: "{{ translations['의 차트와 가장 비슷한 차트는'] }}{{ name }}{{ translations['?'] }}",
+            imageUrl: "{{ url_for('static', filename='image_data/' + market + '/' + base_date + '/compare_chart_' + code + '_' + base_date + '_' + day_num + '.png')|safe }}",
+            url: "{{ request.url|safe }}"
+        };
+    </script>
+    
+    <script>
+        // 날짜 드롭다운 버튼 클릭시 현재 url에서 날짜만 바꿔서 이동
+    function changeDate(date) {
+        if (date != '{{ base_date }}') {
+            LoadingWithMask()
+            var url = new URL(window.location.href);
+            url.searchParams.set('base_date', date);
+            window.location.href = url.toString();
+        }
+    }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <div class='row justify-content-center'>
+            <h3 style="text-align: center"><b>{{ translations['비슷한 차트 탐색 결과'] }}</b></h3>
+        </div>
+        <div class="row justify-content-center" style="margin-top: 25px;">
+            <a class="day_num_button" style="font-size:15px; padding:11px 11px;" onclick="LoadingWithMask();" href="{{ url_for('stock.stock', code=code, market=market, lang=lang) }}">{{ translations['종합'] }}</a>
+        </div>
+        {% if valid_day_num %}
+        <div class="row justify-content-center" style="margin-top: 30px;">
+            {% set text = {"128": "128", "64": "6&nbsp;4", "32": "3&nbsp;2", "16": "1&nbsp;6", "8": "&nbsp;8&nbsp;"} %}
+            {% for num in ['128', '64', '32', '16', '8'] %}
+            <div class="col-2 text-center">
+                {% if num not in valid_day_num or num == day_num %}
+                <!-- num이 valid_day_num에 포함되지 않거나, num이 day_num과 같은 경우 a태그 비활성화 -->
+                <a class="invalid_button disabled" onclick="event.preventDefault();" href="#">{{ text[num]|safe }}</a>
+                {% else %}
+                <!-- 그 외의 경우 a태그 활성화 -->
+                <a class="day_num_button" onclick="LoadingWithMask();" href="{{ url_for('result.result', **{
+                    'code': code,
+                    'base_date': base_date,
+                    'market': market,
+                    'day_num': num,
+                    'lang': lang
+                    }) }}">{{ text[num]|safe }}</a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <hr>
+        <div class="justify-content-center" style="margin-top: 10px;">
+            <div class="row">
+                <div class="col-3 d-flex align-items-center">
+                    <a href="{{ naver_url }}" target="_blank" style="margin-top: -30px;">
+                        <img src="{{ url_for('static', filename='image_data/static_image/naver.png') }}" style="width: 40px; height: 40px;" class="text-left" alt="naver" />
+                    </a>
+                    {% if lang == 'en' and market == 'nyse_naq' %}
+                    <a href="https://finance.yahoo.com/quote/{{ code }}" target="_blank" 
+                    style="margin-top: -30px; margin-left: 10px;">
+                        <img src="{{ url_for('static', filename='image_data/static_image/yahoo.jpg') }}" style="width: 40px; height: 40px;" class="text-left" alt="yahoo" />
+                    </a>
+                    {% endif %}
+                </div>
+                <div id="date-select-div" class="container-fluid col-9" style="margin-bottom: 30px;">
+                    <div class="row justify-content-end">
+                        <div class="col-auto">
+                            <select id="date-select" class="custom-select" aria-label="Date Select" onchange="changeDate(this.value)">
+                            {% for date_str in similar_data_range %}
+                                <option value="{{ date_str }}" {% if date_str == base_date %}selected{% endif %}>{{ date_str }}</option>
+                            {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>            
+            {% if user_agent == "SimilarChartFinder/1.0/dev" or user_agent == "SimilarChartFinder/1.0"%}
+            <h4 style="text-align: center">
+                {% if lang == 'en' and market == 'nyse_naq' %}
+                <a href="https://finance.yahoo.com/quote/{{ code }}" target="_blank" class="yahoo">
+                    <b>{{ name }}</b>
+                </a>
+                {% else %}
+                <a href="{{ naver_url }}" target="_blank" class="naver">
+                    <b>{{ name }}</b>
+                </a>
+                {% endif %}
+            </h4>              
+            {% else %}
+            <h4 style="text-align: center"><b>{{ name }}</b></h4>
+            {% endif %}
+            <h6 style="text-align: center"><b>{{ day_num }}</b>{{ translations['거래일치 비교'] }}</h6>
+            <div class="d-flex justify-content-center">
+                <img src="{{ url_for('static', filename='image_data/' + market + '/' + base_date + '/expected_chart_' + code + '_' + base_date + '_' + day_num + '_' + lang + '.png') }}" class="img-fluid" alt="expected_chart" />
+            </div>
+            <div class="col-12 row justify-content-center">
+                <p class="text-center" style="font-size: 0.9em;"><span class="result_average">{{ translations['비슷한 차트들의'] }} {{ predict_day }}{{ translations['일 후 평균'] }}</span> : 
+                    {% if lang == 'ko' %}
+                    <b class="{{ 'red' if after_close_mean >= 0 else 'blue' }}">{{ after_close_mean }}% {{ '▲' if after_close_mean >= 0 else '▼' }}</b>
+                    {% else %}
+                    <b class="{{ 'green' if after_close_mean >= 0 else 'red' }}">{{ after_close_mean }}% {{ '▲' if after_close_mean >= 0 else '▼' }}</b>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <img src="{{ url_for('static', filename='image_data/' + market + '/' + base_date + '/compare_chart_' + code + '_' + base_date + '_' + day_num + '_' + lang + '.png') }}" class="img-fluid"
+            alt="compare_chart" />
+        </div>
+        <!-- 상단2 -->
+        {% if user_agent != "SimilarChartFinder/1.0/dev" %}
+        <div style="margin-bottom: 10px;">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7879029685491158"
+                crossorigin="anonymous"></script>
+            <ins class="adsbygoogle"
+                style="display:block; height:90px;"
+                data-ad-client="ca-pub-7879029685491158"
+                data-ad-slot="3873312112"
+                data-ad-format="horizontal"
+                data-full-width-responsive="false"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+        {% endif %}
+        <div class="row justify-content-center" style="overflow-x: auto;">
+            <table class="table" style="width: 100%; table-layout: fixed;">
+                <colgroup>
+                    <col style="width: 35%;">
+                    <col style="width: 35%;">
+                    <col style="width: 25%;">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th scope="col" class="item_name">{{ translations['종목명'] }}</th>
+                        <th scope="col" class="industry">{{ translations['업종'] }}</th>
+                        <th scope="col" class="predict_day">{{ translations['후'] }}{{ predict_day }} {{ translations['거래일 후'] }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in similar_chart_list %}
+                    <tr {% if row['compare_stock_industry'] == base_industry %} style="background-color: rgb(186, 255, 255)"{% endif %}>
+                        <td>
+                            <a href="{{ url_for('stock.stock', code=row['compare_stock_code'], market=market, lang=lang) }}" onclick="LoadingWithMask();">
+                                <b style="white-space: normal;">{{ loop.index }}. {{ row['compare_stock_name'] }}</b>
+                            </a>
+                        </td>
+                        <td>{{ row['compare_stock_industry'] }}</td>
+                        <td>
+                            <a href="{{ url_for('result.detail', **{
+                                'base_stock_code': row['base_stock_code'],
+                                'base_date': row['base_date'],
+                                'compare_stock_code': row['compare_stock_code'],
+                                'compare_date': row['compare_date'],
+                                'day_num': day_num,
+                                'market': market,
+                                'lang': lang
+                            }) }}" onclick="LoadingWithMask();"
+                            {% if (lang == 'ko' and row['after_close_change'] >= 0) or (lang == 'en' and row['after_close_change'] < 0) %}
+                            class="red_button"
+                            {% elif lang == 'ko' and row['after_close_change'] < 0 %}
+                            class="blue_button"
+                            {% elif lang == 'en' and row['after_close_change'] >= 0 %}
+                            class="green_button"
+                            {% endif %}>
+                                {{ row['after_close_change'] }}% {{ '▲' if row['after_close_change'] >= 0 else '▼' }}
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p class="text-right mt-1 ml-auto" style="font-size: 0.8em;">※ {{ translations['변동률을 클릭하면 향후 차트를 볼 수 있습니다.'] }}
+                <br>※ <b style="color: aquamarine">■</b> : <span class="table_info2">{{ translations['동일업종'] }}</span></p>
+        </div>
+        <!-- 상단3 -->
+        {% if user_agent != "SimilarChartFinder/1.0/dev" %}
+        <div style="margin-top: 30px; margin-bottom: 30px;">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7879029685491158"
+                crossorigin="anonymous"></script>
+            
+            <ins class="adsbygoogle"
+                style="display:block; height:90px;"
+                data-ad-client="ca-pub-7879029685491158"
+                data-ad-slot="7641694364"
+                data-ad-format="horizontal"
+                data-full-width-responsive="false"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+        {% endif %}
+        <div class="row justify-content-center" style="margin-top: 50px;">
+            <div class="col-3 text-center">
+                <a id="clip-btn" href="{% if user_agent == 'SimilarChartFinder/1.0/dev' or user_agent == 'SimilarChartFinder/1.0' %}javascript:kakaoShare(shareData){% else %}javascript:shareTwitter(shareData){% endif %}">
+                    <figure>
+                        <img src="{{ url_for('static', filename='image_data/static_image/b.png') | safe }}" style="width: 48px; height: 48px; border-radius: 5px;"/>
+                        <figcaption style="color: black;">{{ translations['공유'] }}</figcaption>
+                    </figure>
+                </a>
+            </div>
+            <div class="col-3 text-center">
+                <a id="clip-btn" href="{% if user_agent == 'SimilarChartFinder/1.0/dev' or user_agent == 'SimilarChartFinder/1.0' %}javascript:kakaoShare(shareData){% else %}javascript:shareFacebook(shareData){% endif %}">
+                    <figure>
+                        <img src="{{ url_for('static', filename='image_data/static_image/c.png') | safe }}" style="width: 48px; height: 48px; border-radius: 5px;"/>
+                        <figcaption style="color: black;">{{ translations['공유'] }}</figcaption>
+                    </figure>
+                </a>
+            </div>
+            <div class="col-3 text-center">
+                <a id="kakao-link-btn" href="javascript:kakaoShare(shareData)">
+                    <figure>
+                        <img src="https://developers.kakao.com/assets/img/about/logos/kakaolink/kakaolink_btn_medium.png" style="width: 48px; height: 48px;"/>
+                        <figcaption style="color: black;">{{ translations['공유'] }}</figcaption>
+                    </figure>
+                </a>
+            </div>
+            <div class="col-3 text-center">
+                <a id="clip-btn" href="javascript:clipboardShare()"> 
+                    <figure>
+                        <img src="{{ url_for('static', filename='image_data/static_image/a.png') | safe }}" style="width: 48px; height: 48px; border-radius: 5px;"/>
+                        <figcaption style="color: black;">url {{ translations['복사'] }}</figcaption>
+                    </figure>
+                </a>
+            </div>
+        </div>
+        <div id="loadingcontainer"></div>
+    </div>
+</body>
+</html>
+{% endblock %}

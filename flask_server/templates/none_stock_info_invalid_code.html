@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} - {{ translations['미지원 종목'] }}{% endblock %}
+{% block og_title %}{{ code }} - {{ translations['미지원 종목'] }}{% endblock %}
+{% block og_image %}{{ url_for('static', filename='image_data/static_image/link_logo_' + lang + '.png') }}{% endblock %}
+{% block og_description %}{{ code }} - {{ translations['주식만 지원합니다.(ETF, ETN등은 미지원)'] }}{% endblock %}
+{% block description %}{{ code }} - {{ translations['주식만 지원합니다.(ETF, ETN등은 미지원)'] }}{% endblock %}
+{% block content %}
+<!DOCTYPE html>
+
+<head>
+</head>
+
+<body>
+    <div class="container">
+        <div class='row justify-content-center'>
+            <h3 style="text-align: center"><b>{{ translations['비슷한 차트 탐색 결과'] }}</b></h3>
+        </div>
+        <h4 class="mt-5" style="text-align: center"><b>{{ translations['미지원 종목'] }}</b></h4>
+        <hr>
+        <br>
+        <br>
+        <div class="justify-content-center" style="margin-top: 50px;">
+            <p class="text-center" style="font-size: 1.2em;">{{ translations['미지원 종목입니다.(ETF, ETN, 우선주, 시가총액 일정이하, 한국/미국 이외의 주식)'] }}</p>
+        </div>
+        <div class="row justify-content-center" style="margin-top: 50px;">
+            <div class="col-6 d-flex justify-content-center">
+                <button class="day_num_button" style="font-size:15px; padding: 11px 11px;" onclick="LoadingWithMask(); history.go(-1);">{{ translations['뒤로가기'] }}</button>
+            </div>
+            <div class="col-6 d-flex justify-content-center">
+                <a href="{{ url_for('index', lang=lang) }}" class="day_num_button" style="font-size:15px; padding: 11px 11px;" onclick="LoadingWithMask();">{{ translations['메인으로'] }}</a>
+            </div>
+        </div>
+        <div id="loadingcontainer"></div>
+    </div>
+</body>
+</html>
+{% endblock %}

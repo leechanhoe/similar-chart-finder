@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<!DOCTYPE html>
+
+<head>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="mt-5 custom-title similar_chart_finder"><b>{{ translations['비슷한 차트 검색기'] }}</b></h1>
+        {% if market == "kospi_daq" %}
+        <h3 style="text-align: center" class="kospi_daq"><b>{{ translations['코스피 & 코스닥'] }}</b></h3>
+        {% else %}
+        <h3 style="text-align: center" class="nyse_naq"><b>{{ translations['뉴욕증권 & 나스닥'] }}</b></h3>
+        {% endif %}
+
+        <div class="row mb-3 justify-content-center" style="margin-bottom: 100px;">
+            {% if market == "kospi_daq" %}
+            <p class="text-center mt-5 intro1_kospi_daq" style="font-size: 1.2em;">{{ translations['현재 코스피와 코스닥에 상장되어 있는 우선주를 제외한 전 종목을 지원하며, 최근 10년간 <b>300만 개 이상</b>의 차트를 탐색합니다.'] | safe}}</p>
+            {% else %}
+            <p class="text-center mt-5 intro1_nyse_naq" style="font-size: 1.2em;">{{ translations['현재 뉴욕증권거래소와 나스닥증권거래소에 상장된 시가총액 상위 3000개 종목을 지원하며, 최근 10년간 <b>300만 개 이상</b>의 차트를 탐색합니다.'] | safe}}</p>
+            {% endif %}
+        </div>
+        <div class='row justify-content-center'>
+            <p class="text-center mt-3 intro2" style="font-size: 1.2em;">{{ translations['과거 비슷한 차트를 기반으로 분석한 것으로 투자의 책임은 <b>투자자 본인</b>에게 있습니다.'] | safe}}</p>
+        </div>
+        <hr>
+        <div class="justify-content-center" style="margin-top: 100px;">
+            <p class="text-center" style="font-size: 1.2em;">{{ translations['해당 차트와 비슷한 과거 차트가 존재하지 않습니다.'] }}</p>
+        </div>
+        <div class="row justify-content-center" style="margin-top: 100px;">
+            <a href="{{ url_for('main_' + market + '.' + 'main_' + market, lang=lang)}}" class="day_num_button" style="font-size:15px; padding: 11px 11px;" onclick="LoadingWithMask();">{{ translations['메인으로'] }}</a>
+        </div>
+        <div id="loadingcontainer"></div>
+    </div>
+    <hr>
+</body>
+
+</html>
+{% endblock %}

@@ -1,0 +1,40 @@
+p {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.green{
+    color: rgb(0, 170, 0)
+}
+
+.red{
+    color: red
+}
+
+.blue{
+    color: blue;
+}
+
+.container{
+    margin-bottom: 50px;
+}
+
+#code_input {
+    max-width: 300px;
+}
+
+.naver{
+    color: #2db400;
+}
+
+.naver:hover{
+    color: #238a00;
+}
+
+.yahoo{
+    color: #6000d3;
+}
+
+.yahoo:hover{
+    color: #5200b5;
+}

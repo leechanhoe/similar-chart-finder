@@ -1,0 +1,56 @@
+.related-items-table thead {
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.related-items-table th,
+.related-items-table td {
+    padding: 3px;
+    text-align: center;
+    border-left: none;
+    border-right: none;
+}
+
+.related-items-table th {
+    color: #000;
+    border-top: 2px solid #000;
+    border-bottom: 2px solid #000;
+    height: 20px;
+}
+
+.related-items-table tbody :hover {
+    cursor: pointer;
+}
+
+.related-items-table td {
+    height: 80px;
+    overflow: hidden;
+    border: 5px solid white;
+}
+
+.related-items-table td:hover {
+    background-color: #eeeeee;
+}
+
+.related-items-table td.red {
+    background-color: rgba(255, 0, 0, 0.05);
+}
+
+.related-items-table td.red:hover {
+    background-color: rgba(255, 0, 0, 0.1);
+}
+
+.related-items-table td.blue {
+    background-color: rgba(0, 0, 255, 0.05);
+}
+
+.related-items-table td.blue:hover {
+    background-color: rgba(0, 0, 255, 0.1);
+}
+
+.related-items-table td.green {
+    background-color: rgba(0, 255, 0, 0.05);
+}
+
+.related-items-table td.green:hover {
+    background-color: rgba(0, 255, 0, 0.1);
+}

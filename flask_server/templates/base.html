@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='image_data/static_image/logo_' + lang + '.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='image_data/static_image/logo_' + lang + '.ico') }}">
+    <!-- 공통 메타데이터 -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url }}">
+    <title>{% block title %}{% endblock %}</title>
+    <meta property="og:title" content="{% block og_title %}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{% endblock %}">
+    <meta name="description" content="{% block description %}{% endblock %}">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="google-site-verification" content="wdv1omG8eDdS1T-DBjZ7GUDvo4VwYvdvBuK9Arjr-Oc" />
+    <meta name="naver-site-verification" content="6e0e24dd9819fa15d46479e8ef37c044b51d3e6b" />
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous">
+    </script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
+    </script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.1/js/tempusdominus-bootstrap-4.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!--카카오 개발자 SDK인 kakao.min.js 파일이 연결되어 있습니다.-->
+    <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+
+    <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7879029685491158"
+     crossorigin="anonymous"></script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E0YJ9SDV8D"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-E0YJ9SDV8D');
+    </script>
+
+    <!--tempusdominus-bootstrap-4와 font-awesome CSS 파일들이 연결되어 있습니다.Font Awesome은 다양한 아이콘들을 제공하는 편리한 툴킷입니다.-->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.1/css/tempusdominus-bootstrap-4.min.css" />
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/footer.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/scrolling.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/button.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tooltip.css') }}">
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'G-V2ST7N3ZY3');
+    </script>
+
+    <!-- 구글 애드센스 -->
+    {% if user_agent != "SimilarChartFinder/1.0/dev" %}
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7879029685491158"
+        data-overlays="bottom" crossorigin="anonymous"></script>
+    {% endif %}
+
+    <script type="text/javascript">
+        window.translations = {{ translations|tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='js/loading.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/language.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/clipboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/scrolling.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/tooltip.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/adBanner.js') }}"></script>
+    <script>
+        var static_url = "{{ url_for('static', filename='') }}";
+        var lang = "{{ lang|default('ko') }}";
+        var currentLang = "{{ lang|default('ko') }}";
+        var currentUrl = "{{ request.url|safe }}";
+        var copyFailMessage = "{{ translations['클립보드 복사에 실패하였습니다.'] }}";
+        var copySuccessMessage = "{{ translations['클립보드에 복사가 완료되었습니다.'] }}";
+    </script>
+
+    <style>
+        .navbar-toggler {
+            padding: 0.25rem;
+            min-width: 2rem;
+            margin-left: 5px;
+            margin-right: -10px;
+        }
+
+        @media (max-width: 400px) {
+            .finder-text {
+                display: none;
+            }
+        }
+    </style>
+</head> 
+
+<body>
+    <!-- Navigation -->
+    {% block navigation %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('index', lang=lang) }}" style="font-weight: bold;" onclick="LoadingWithMask();">
+                <img src="{{ url_for('static', filename='image_data/static_image/logo_34x34_' + lang + '.png') }}" alt="Logo">
+                Similar Chart <span class="d-inline finder-text">Finder</span></a>
+            
+            {% if market %}
+                {% set page = market %}
+            {% else %}
+                {% if lang == 'en' %}
+                    {% set page = 'nyse_naq' %}
+                {% else %}
+                    {% set page = 'kospi_daq' %}
+                {% endif %}
+            {% endif %}
+            <button class="btn btn-outline-secondary d-lg-none ml-auto" type="button" onclick="LoadingWithMask(); window.location.href='{{ url_for('main_' + page + '.main_' + page, lang=lang) }}'">
+                <i class="fa fa-search"></i>
+            </button>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarText">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                {% for url, mkt, name, name_en in [("main_kospi_daq.main_kospi_daq", "kospi_daq", "한국시장", "Korean Market"), ("main_nyse_naq.main_nyse_naq", "nyse_naq", "미국시장", "US Market"), 
+                ("statistics.statistics", "statistics", "랭킹", "Ranking"), ("validation.validation", "validation", "검증", "Validation")] %}
+                <li class="nav-item">
+                    {% if lang not in ['ko', 'en'] %}
+                        {% set lang = 'ko' %}
+                    {% endif %}
+                    <a class="nav-link {% if market|default('') == mkt or request.path == url_for(url) or mkt in request.path %}active{% endif %}" href="{{ url_for(url, lang=lang) }}" onclick="LoadingWithMask();">
+                    {% if lang == 'en' %}
+                        {{ name_en }}
+                    {% else %}
+                        {{ name }}
+                    {% endif %}
+                    </a>
+                </li>
+                {% endfor %}
+                </ul>
+                <button class="btn btn-outline-secondary d-none d-lg-block ml-auto" type="button" onclick="LoadingWithMask(); window.location.href='{{ url_for('main_' + page + '.main_' + page, lang=lang) }}'">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;" >
+        {% if popular_ranking %}
+        <div class="scrolling-div" style="margin-top: 10px;" onclick="">
+            {% for i in range(100) %}
+                <div onclick="LoadingWithMask(); window.location.href='{{ url_for('stock.stock', code=popular_ranking[i % 10]['code'], lang=lang) }}'">
+                    <b>{{ popular_ranking[i % 10]['name'] }}</b>
+                    <span style="color: {% if popular_ranking[i % 10]['average'] >= 0 %}red{% else %}blue{% endif %};">
+                        {% if popular_ranking[i % 10]['average'] >= 0 %}
+                        <b class="{{ 'red' if lang == 'ko' else 'green' }}">▲</b>
+                        {% else %}
+                        <b class="{{ 'blue' if lang == 'ko' else 'red' }}">▼</b>
+                        {% endif %}
+                    </span>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div style="margin-top: 10px; margin-bottom: 50px;">
+            {% if user_agent != "SimilarChartFinder/1.0/dev" %}
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7879029685491158"
+                crossorigin="anonymous"></script>
+            <!-- 상단 -->
+            <ins class="adsbygoogle"
+                style="display:block; height:50px; width:100%;"
+                data-ad-client="ca-pub-7879029685491158"
+                data-ad-slot="5412688715"
+                data-ad-format="horizontal"
+                data-full-width-responsive="false"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- <h6 style="text-align: center"><b>Beta Version</b></h6> -->
+    {% endblock %}
+
+    <!-- Language Select, ads -->
+    {% block top %}
+    {% endblock %}
+
+
+    <!-- Page Content -->
+    {% block content %}{% endblock %}
+
+    {% block bottom %}
+    {% if user_agent != "SimilarChartFinder/1.0/dev" and user_agent != "SimilarChartFinder/1.0" and not is_app %}
+    <a href="https://play.google.com/store/apps/details?id=com.similarchart.chartfinder" 
+    target="_blank" style="text-decoration: none; cursor: pointer;">
+        <div class="parent" style="display: flex; justify-content: center; margin-top: 50px; margin-bottom: 50px;">
+            <div class="row justify-content-center" style="display: inline-flex; align-items: center; background-color: antiquewhite; padding: 10px 20px; border-radius: 30px;">
+                <img src="{{ url_for('static', filename='image_data/static_image/glass_' + lang + '.png') | safe }}" style="width: 64px; height: 64px; border-radius: 10px;"/>
+                <p class="chart_img_info text-center" style="margin: 0; padding-left: 10px;">
+                    <b style="font-size: 16px; font-weight: 900; color: saddlebrown;">{{ translations['앱에서 비슷한 차트 확인하기'] }}</b><br>
+                    <span style="font-size: 12px; color: peru; font-weight: 700;">
+                        {{ translations['드로잉검색 지원'] }} & {{ translations['증권 연동'] }}<br>
+                        {{ translations['캔들패턴검색 지원'] }} & {{ translations['종목 즐겨찾기 지원'] }}
+                    </span>
+                </p>
+            </div>
+        </div>
+    </a>
+    {% endif %}
+    {% if user_agent != "SimilarChartFinder/1.0/dev" %}
+    <div style="margin-bottom: 20px;">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7879029685491158"
+            crossorigin="anonymous"></script>
+        <!-- 하단 -->
+        <ins class="adsbygoogle"
+            style="display:block; width:100%;"
+            data-ad-client="ca-pub-7879029685491158"
+            data-ad-slot="8968790341"
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+    {% endif %}
+    {% endblock %}
+    
+    <!-- Footer -->
+    <footer>
+        <div class="inner">
+            {% if user_agent != "SimilarChartFinder/1.0/dev" and user_agent != "SimilarChartFinder/1.0" and not is_app %}
+            <div id="language-select-div" class="container-fluid" style="margin-bottom: 50px;">
+                <div class="row justify-content-end">
+                    <div class="col-auto">
+                        <select id="language-select" class="custom-select" aria-label="Language Select" onchange="changeLanguage(this.value)">
+                            <option selected>{{ translations['언어 선택'] }}...</option>
+                            <option value="ko">한국어</option>
+                            <option value="en">English</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            <div class="copyright">
+                &copy; <span class="this-year">2024.</span> similarchart@gmail.com. All Rights Reseved.
+            </div>
+        </div>
+    </footer>
+
+    
+</body>
+</html>

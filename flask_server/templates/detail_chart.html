@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ translations['비슷한 차트 검색'] }} - {{ translations['향후 추이'] }}{% endblock %}
+{% block og_title %}{{ translations['비슷한 차트 검색'] }} - {{ translations['향후 추이'] }}{% endblock %}
+{% block og_image %}{{ url_for('static', filename='image_data/static_image/link_logo_' + lang + '.png') }}{% endblock %}
+{% block og_description %}{{ translations['전 종목의 최근 10년간 모든 차트를 탐색합니다.'] }} {{ translations['내 종목의 차트는 과연 상승하는 차트일까요?'] }}{% endblock %}
+{% block description %}{{ translations['전 종목의 최근 10년간 모든 차트를 탐색합니다.'] }} {{ translations['내 종목의 차트는 과연 상승하는 차트일까요?'] }}{% endblock %}
+{% block content %}
+<!DOCTYPE html>
+
+<head>
+</head>
+
+<body>
+    <div class="container">
+        <div class='row justify-content-center'>
+            <h3 style="text-align: center"><b>{{ translations['향후 추이'] }}</b></h3>
+        </div>
+        <hr>
+        <h4 style="text-align: center"><a onclick="LoadingWithMask();" href="{{ url_for('stock.stock', code=compare_stock_code, market=market) }}"><b>{{ compare_stock_name }}</b> ({{ compare_stock_code }})</a></h4>
+        <div class='justify-content-center'>
+            {{ detail_chart | safe }}
+            <p class="text-right ml-auto" style="font-size: 0.8em;">※ {{ translations['캔들스틱을 터치하면 가격을 볼 수 있습니다.'] }}
+                <br>※ <b style="color: gold">■</b> : <span class="table_info2">{{ translations['향후 추이'] }}</span></p>
+            <br>
+            <p class="text-center ml-auto"><span class="predict_day">{{ translations['후'] }}{{ predict_day }} {{ translations['거래일 후'] }}</span> : 
+            {% if after_close_change >= 0 %}
+            <b class="{{ 'red' if lang == 'ko' else 'green' }}">{{ after_close_change }}% ▲</b>
+            {% else %}
+            <b class="{{ 'blue' if lang == 'ko' else 'red' }}">{{ after_close_change }}% ▼</b>
+            {% endif %}
+            </p>
+        </div>
+        <div class="row justify-content-center" style="margin-top: 50px; margin-bottom: 50px;">
+            <a href="{{ url_for('result.result', **{
+                'code': base_stock_code,
+                'base_date': base_date,
+                'market': market,
+                'day_num': day_num,
+                'lang': lang
+                }) }}" class="btn btn-dark btn-lg" onclick="LoadingWithMask();">
+                <i class="fas fa-rotate-left"></i></a>
+        </div>
+        <div id="loadingcontainer"></div>
+    </div>
+</body>
+</html>
+{% endblock %}
