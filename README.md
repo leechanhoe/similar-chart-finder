@@ -59,3 +59,9 @@
 - **`redis`** : 레디스 컨테이너 설정정보
 - **`nginx_server`** : nginx 컨테이너 설정정보
 - **`shared_files`** : 모든 컨테이너에서 공유하는 파일
+
+<br>
+<br>
+<br>
+
+## Airflow를 도입하여 리팩토링 예정
