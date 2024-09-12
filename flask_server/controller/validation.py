@@ -44,12 +44,19 @@ def validation():
     validation_date = total_validation.loc[0, 'date']
 
     logging.info(f"visited {PAGE_NAME} - type={type} / page={page} / lang={lang}")
-    return render_template('validation.html', detail_data=paginated_data.to_dict('records'), 
-                           total_pages=total_pages, current_page=page, lang=lang, type=type,
-                           page_range=page_range, validation_date=validation_date,
-                           translations=translations[lang],
-                           popular_ranking=get_popular_ranking('kospi_daq' if lang == 'ko' else 'nyse_naq', with_name=lang),
-                           total_validation=total_validation.to_dict('records'))
+    template_kwargs = {
+        'detail_data': paginated_data.to_dict('records'),
+        'total_pages': total_pages,
+        'current_page': page,
+        'lang': lang,
+        'type': type,
+        'page_range': page_range,
+        'validation_date': validation_date,
+        'translations': translations[lang],
+        'popular_ranking': get_popular_ranking('kospi_daq' if lang == 'ko' else 'nyse_naq', with_name=lang),
+        'total_validation': total_validation.to_dict('records')
+    }
+    return render_template('validation.html', **template_kwargs)
 
 @bp.route('/daliy', methods=['GET'])
 def daliy():
@@ -66,10 +73,17 @@ def daliy():
     verified_date, d_day = is_verified_date(date)
 
     logging.info(f"visited {PAGE_NAME}/daliy - date={date} / lang={lang}")
-    return render_template('daliy_validation.html', detail_data=detail_data.to_dict('records'), lang=lang,
-                           translations=translations[lang], verified_date=verified_date, 
-                           d_day=d_day, date=date,
-                           popular_ranking=get_popular_ranking('kospi_daq' if lang == 'ko' else 'nyse_naq', with_name=lang))
+    
+    template_kwargs = {
+        'detail_data': detail_data.to_dict('records'),
+        'lang': lang,
+        'translations': translations[lang],
+        'verified_date': verified_date,
+        'd_day': d_day,
+        'date': date,
+        'popular_ranking': get_popular_ranking('kospi_daq' if lang == 'ko' else 'nyse_naq', with_name=lang)
+    }
+    return render_template('daliy_validation.html', **template_kwargs)
 
 @bp.route('/detail', methods=['GET'])
 def detail():
@@ -112,12 +126,23 @@ def detail():
     investing_url, naver_url = get_url(code, market, lang)
 
     logging.info(f"visited {PAGE_NAME}/detail - date={date} / code={code} / lang={lang}")
-    return render_template('detail_validation.html', statistics_data=statistics_data, lang=lang,
-                           translations=translations[lang], verified_date=verified_date, 
-                           d_day=d_day, date=date, naver_url=naver_url,
-                           profit=profit,
-                           gauge_name=gauge_name, score=score, average_dif=average_dif,
-                           popular_ranking=get_popular_ranking('kospi_daq' if lang == 'ko' else 'nyse_naq', with_name=lang))
+
+    template_kwargs = {
+        'statistics_data': statistics_data,
+        'lang': lang,
+        'translations': translations[lang],
+        'verified_date': verified_date,
+        'd_day': d_day,
+        'date': date,
+        'naver_url': naver_url,
+        'profit': profit,
+        'gauge_name': gauge_name,
+        'score': score,
+        'average_dif': average_dif,
+        'popular_ranking': get_popular_ranking('kospi_daq' if lang == 'ko' else 'nyse_naq', with_name=lang)
+    }
+    return render_template('detail_validation.html', **template_kwargs)
+
 
 # 당시 날짜의 전 종목 평균 점수 역산하기
 def _get_average_dif(data, origin):

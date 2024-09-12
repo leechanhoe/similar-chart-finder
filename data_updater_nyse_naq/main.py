@@ -22,7 +22,7 @@ try:
     start(market)
 except Exception as e:
     tb = traceback.format_exc()
-    logging.error(f"{e}")
+    logging.error(f"{e}\n{tb}")
 
     # 에러 발생시 aws lambda를 이용한 이메일 발송
     notify_via_lambda(f"{e}\n{tb}")

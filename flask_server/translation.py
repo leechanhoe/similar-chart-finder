@@ -34,7 +34,7 @@ translations = {
         '약 6달 치의 장기적 관점부터 8거래일치의 단기적 관점까지 모두 고려합니다.': '약 6달 치의 장기적 관점부터 8거래일치의 단기적 관점까지 모두 고려합니다.',
         '10 거래일 후 상승 확률' : '10 거래일 후 상승 확률',
         '실제 검증 결과, 비슷한 차트들이 상승하면 실제 상승확률도 높아집니다.': '실제 검증 결과, <b>비슷한 차트들이 상승하면 실제 상승확률도 높아집니다.</b>',
-        '지속적인 실현손익 상위 5% 이내 유지 비법': '지속적인 실현손익 <b>상위 5%</b> 이내 유지 비법',
+        '지속적인 실현손익 상위 5% 이내 유지': '지속적인 실현손익 <b>상위 5%</b> 이내 유지',
         '토스증권 실전투자대회 상위 1.5% 마감': '토스증권 실전투자대회 <b>상위 1.5%</b> 마감',
         '미국주식 상위 200 기준': '<b>미국주식 상위 200</b> 기준',
         '점수 구간별 확률 자세히 보기': '점수 구간별 확률 자세히 보기',
@@ -255,7 +255,7 @@ translations = {
         '미국주식 상위 200 기준' : 'Based on <b>Top 200 U.S. Stocks</b>',
         '점수 구간별 확률 자세히 보기': "View Detailed Probability by Score Range",
 
-        '지속적인 실현손익 상위 5% 이내 유지 비법': 'Secrets to Consistently Staying<br>in the <b>Top 5%</b> of Gains',
+        '지속적인 실현손익 상위 5% 이내 유지': 'Consistently Staying<br>in the <b>Top 5%</b> of Gains',
         '토스증권 실전투자대회 상위 1.5% 마감': '<b>Top 1.5%</b> in<br>Toss Securities Investment Competition',
         '비슷한 차트 검색기 앱 출시!': 'Similar Chart Finder App Released!',
         '현재 안드로이드만 지원합니다.': 'Currently Available on Android Only',

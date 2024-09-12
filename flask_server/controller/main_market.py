@@ -41,7 +41,6 @@ def _handle_get_request(request, market):
         'code': code,
         'name': name
     }
-
     return render_template(f'main_{market}.html', **template_kwargs)
 
 # 검색 버튼 로직

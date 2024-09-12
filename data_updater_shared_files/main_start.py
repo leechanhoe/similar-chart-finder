@@ -1,15 +1,16 @@
 from data_generator import is_market_open, update_code_list, update_stock_data
-from shared_func import declare_completion, update_valid_stock_code, update_view
-from similar_generator import update_all_similar_data, delete_old_similar_data, generate_all_normed_data
+from shared_func import update_caches, delete_old_data, update_valid_stock_code, update_view, load_index_data
+from similar_generator import update_all_similar_data, generate_all_normed_data
 from statistics_generator import update_statistics
 from prepared_data import save_all_prepared_data
-from image_deleter import delete_result_image, delete_cache_image
+from image_deleter import delete_cache_image
 from pyfile.web_scraping import update_popular_stock_all_market, update_translated_name, update_industry_en
 from pyfile.data_reader import get_stock_code, update_cache_code_name_industry_url
 from datetime import datetime
 from pyfile.web_scraping import update_investing_url
 from pyfile.profit_validation import update_profit_validation
 from pyfile.candle_pattern_search import save_pattern
+from pyfile.drawing_search import save_interval
 from pyfile.statistics_reader import delete_past_statistics_cache
 import logging
 
@@ -23,10 +24,11 @@ def _market_open_day(market, start_time):
     update_statistics(start_time, market)
     update_profit_validation(start_time, market)
 
-    declare_completion(start_time, market)
+    update_caches(start_time, market)
+    delete_old_data(start_time, market)
+    load_index_data(start_time, market)
     
-    delete_result_image(start_time, market)
-    delete_old_similar_data(start_time, market)
+    save_interval(market)# 드로잉 검색을 위한 파일 최신 업데이트
 
 # 주식시장이 닫힌 날 실행
 def _market_close_day(market, start_time):
@@ -41,7 +43,7 @@ def _market_close_day(market, start_time):
         update_translated_name(market)
         update_industry_en(market)
 
-        save_pattern(start_time, market, 4)
+        save_pattern(start_time, market, 4) # 패턴 검색을 위한 데이터 갱신
         delete_cache_image()
         delete_past_statistics_cache() # 검증 페이지용 통계 데이터 삭제
 

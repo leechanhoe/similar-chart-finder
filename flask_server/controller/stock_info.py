@@ -80,12 +80,27 @@ def stock_info():
     # indicator = get_indicators(market, code, data['date'], lang, update=True).to_dict('records')
 
     logging.info(f"visited {PAGE_NAME} : ({get_name(code, market, lang)}){code} - score : {score}")
-    return render_template(f'{PAGE_NAME}.html', data=data, gauge_name=gauge_name, lang=lang,
-                           market=market, investing_url=investing_url, update_date=data['date'],
-                           translations=translations[lang], naver_url=naver_url, none_result=none_result,
-                           same_industry=same_industry, popular_ranking=get_popular_ranking(market, with_name=lang),
-                           score=score, valid_day_num=valid_day_num, average_dif=average_dif,
-                           analysis=analysis, range_low=range_low, range_high=range_high)
+    
+    template_kwargs = {
+        'data': data,
+        'gauge_name': gauge_name,
+        'lang': lang,
+        'market': market,
+        'investing_url': investing_url,
+        'update_date': data['date'],
+        'translations': translations[lang],
+        'naver_url': naver_url,
+        'none_result': none_result,
+        'same_industry': same_industry,
+        'popular_ranking': get_popular_ranking(market, with_name=lang),
+        'score': score,
+        'valid_day_num': valid_day_num,
+        'average_dif': average_dif,
+        'analysis': analysis,
+        'range_low': range_low,
+        'range_high': range_high
+    }
+    return render_template(f'{PAGE_NAME}.html', **template_kwargs)
 
 # Duplicate the blueprint with 'stock' URL prefix
 stock_bp = Blueprint('stock', __name__, url_prefix='/stock')

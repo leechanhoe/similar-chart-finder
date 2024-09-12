@@ -34,9 +34,19 @@ def statistics():
     key = f'{market}_{up}_{rise_rate}_{day_num}'
     logging.info(f"visited {PAGE_NAME} - {key} / {lang}")
 
-    return render_template(f'{PAGE_NAME}.html', data=data.to_dict('records'), date=data.iloc[0]['date'].strftime('%Y-%m-%d'),
-                           market_type=market, up=up, rise_rate=rise_rate, day_num=day_num, image_name=key, lang=lang,
-                           translations=translations[lang], popular_ranking=get_popular_ranking(market, with_name=lang))
+    template_kwargs = {
+        'data': data.to_dict('records'),
+        'date': data.iloc[0]['date'].strftime('%Y-%m-%d'),
+        'market_type': market,
+        'up': up,
+        'rise_rate': rise_rate,
+        'day_num': day_num,
+        'image_name': key,
+        'lang': lang,
+        'translations': translations[lang],
+        'popular_ranking': get_popular_ranking(market, with_name=lang)
+    }
+    return render_template(f'{PAGE_NAME}.html', **template_kwargs)
 
 @bp.route('/submit', methods=['POST'])
 def submit():

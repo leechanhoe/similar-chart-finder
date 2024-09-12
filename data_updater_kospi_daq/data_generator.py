@@ -24,7 +24,7 @@ def is_market_open(date, market, max_retries=5, retry_delay=3):
 
     for attempt in range(max_retries):
         try:
-            all_open_date = fdr.DataReader('005930').index[:].strftime('%Y-%m-%d').tolist()
+            all_open_date = get_stock_data_fdr("KS11", date_str, date_str, market).index[:].strftime('%Y-%m-%d').tolist()
             break  # 성공 시 루프를 빠져나감
         except Exception as e:
             logging.info(f"is_market_open - error \n {e}")
@@ -34,8 +34,10 @@ def is_market_open(date, market, max_retries=5, retry_delay=3):
                 raise  # 최대 재시도 횟수에 도달하면 예외를 다시 던짐
 
     if krx_calendar.is_session(date) and date_str in all_open_date:
+        logging.info(f"Market is open")
         return True  # Market is open
     else:
+        logging.info(f"Market is closed")
         return False  # Market is closed
 
 # fdr.StockListing이 오류 발생시 한국 주식 종목 리스트를 불러오는 대체함수
@@ -84,7 +86,7 @@ def update_code_list(market):
     
     if len(df_codes) < 1000: # 종목 개수가 1000개 이하면 라이브러리 버그 의심
         logging.warn(f"update_code_list_{market} 종목 개수 경고 : {len(df_codes)}개 - 오류 의심")
-        return
+        raise Exception(f"종목 개수가 {len(df_codes)}개로, 정상적이지 않습니다. 오류를 확인하세요.")
         
     df_codes = df_codes[df_codes['Market'] != 'KONEX']
     df_codes = df_codes[['Code', 'Name']]
@@ -121,10 +123,9 @@ def update_code_list(market):
     
     # Find newly listed stocks and add them to the table.
     new_stocks_df = df_codes[~df_codes['code'].isin(db_stock_data_df['code'])]
-    duplicated_df = new_stocks_df[new_stocks_df.duplicated('code', keep=False)]
-    # logging.info(f"duplicated code : {duplicated_df}")
     new_stocks_df = new_stocks_df.drop_duplicates('code', keep='first')
 
+    # 신규종목 추가
     new_stocks_df[['code', 'ranking']].to_sql(f'stock_code_list_{market}', con=engine, if_exists='append', index=False)
     new_stocks_df[['code', f'name_{lang}']].to_sql(f'stock_name_{market}', con=engine, if_exists='append', index=False)
     new_stocks_df[['code', f'industry_ko']].to_sql(f'stock_industry_{market}', con=engine, if_exists='append', index=False)
@@ -212,7 +213,7 @@ def get_latest_stock_data(base_date, df_codes, day_ago_close, market):
     for i, row in df_codes.iterrows():
         code = row['code']
         
-        stock_price = get_stock_data_fdr(code, start_date, end_date)
+        stock_price = get_stock_data_fdr(code, start_date, end_date, market)
         if len(stock_price) == 0:
             invalid.append(code)
             continue
@@ -229,6 +230,7 @@ def get_latest_stock_data(base_date, df_codes, day_ago_close, market):
                 logging.info(f"{code} - db에 이전 데이터가 없었는데 라이브러리로 2일치 불러옴")
                 invalid.append(code)
         else:
+            # 신규상장종목이거나 or db에 있는 전날 가격과 새로 불러운 전날 가격이 같으면 데이터 정합성을 지킨다고 판단
             if len(stock_price) == 1 or round(day_ago_close[row['code']], 2) == round(stock_price.loc[start_date]['Close'], 2):
                 try:
                     df_list.append(stock_price.loc[base_date].to_frame().T)
@@ -257,9 +259,11 @@ def update_stock_data(base_date, market, month=130, recreate=False):
         if recreate: # 주가 데이터의 무결성을 위해 주기적으로 데이터 전체 삭제 후 전체 다시 생성
             connection.execute(text(f"DELETE FROM stock_data_{market}"))
 
-        count_records_query_result = connection.execute(text(f"SELECT COUNT(*) FROM stock_data_{market} LIMIT 1"))
+        count_records_query_result = connection.execute(
+            text(f"SELECT COUNT(*) FROM stock_data_{market} LIMIT 1"))
         count_records_total = count_records_query_result.fetchone()[0]
 
+        data_len = 0
         if count_records_total == 0: # 초기상태 : 데이터베이스에 데이터가 없는상태면 다 넣어주기
             compared_code_list = get_compared_code_list(market)
             if len(compared_code_list) != 0:
@@ -272,7 +276,8 @@ def update_stock_data(base_date, market, month=130, recreate=False):
             for idx, row in df_codes.iterrows():
                 code = row['code']
                 start = start_date if row['compared'] else start_date2 # comparison 테이블에 있는 코드면 11년치 데이터
-                new_data_df = get_stock_data_fdr(code, start, end_date)
+                new_data_df = get_stock_data_fdr(code, start, end_date, market)
+                data_len += len(new_data_df)
                 if len(new_data_df) == 0:
                     invalid.append(code)
                 
@@ -301,26 +306,24 @@ def update_stock_data(base_date, market, month=130, recreate=False):
 
             logging.info("Insert Only Latest Stock Price Data")
 
+            # 가장 최근 날짜의 종목별 종가 데이터를 가져오는 코드
+            latest_closing_prices_query = f"""
+            SELECT code, close_price 
+            FROM stock_data_{market} 
+            WHERE date = (SELECT MAX(date) FROM stock_data_{market})
+            """
+            latest_closing_prices = pd.read_sql_query(latest_closing_prices_query, connection)
             try: # fdr.StockListing('KRX')에서 간헐적으로 라이브러리 자체의 오류발생
                 latest_df = fdr.StockListing('KRX')
                 latest_df = latest_df[latest_df['Market'] != 'KONEX']
                 latest_df = latest_df[latest_df['Code'].isin(df_codes['code'].values)]
                 latest_df = latest_df[['Code', 'Open', 'High', 'Low', 'Close', 'Volume', 'ChagesRatio']]
-                latest_df = latest_df.reset_index(drop=True)
-
-                # 가장 최근 날짜의 종목별 종가 데이터를 가져오는 코드
-                latest_closing_prices_query = f"""
-                SELECT code, close_price 
-                FROM stock_data_{market} 
-                WHERE date = (SELECT MAX(date) FROM stock_data_{market})
-                """
-                latest_closing_prices = pd.read_sql_query(latest_closing_prices_query, connection)
-                
+                latest_df = latest_df.reset_index(drop=True)     
 
                 # 종목별 종가 데이터를 코드를 기준으로 dictionary로 변환
                 latest_closing_dict = latest_closing_prices.set_index('code').T.to_dict('records')[0]
 
-                # reupdate 리스트 초기화
+                # db 주가 데이터와 정합성 체크
                 reupdate = []
                 # latest_df의 각 행에 대해 반복
                 for idx, row in latest_df.iterrows():
@@ -336,25 +339,15 @@ def update_stock_data(base_date, market, month=130, recreate=False):
                 # 'Code'가 change 리스트에 포함되어 있지 않은 행만 선택하여 latest_df 업데이트
                 latest_df = latest_df[~latest_df['Code'].isin(reupdate)]
 
-                # ChagesRatio 값을 100분의 1로 변환
                 latest_df['ChagesRatio'] = latest_df['ChagesRatio'] / 100
-                # 열 이름을 ChagesRatio에서 Change로 변경
                 latest_df.rename(columns={'ChagesRatio': 'Change'}, inplace=True)
 
             except Exception as e: # fdr.StockListing('KRX')오류 발생시 다른 로직으로 데이터 업데이트
-                logging.warn(f"fdr.StockListing('KRX') error : \n{e}")
-                query = f"""
-                SELECT code, close_price 
-                FROM stock_data_{market} 
-                WHERE date = (SELECT max(date) FROM stock_data_{market})
-                """
-                df = pd.read_sql_query(query, connection)
-                day_ago_close = df.set_index('code')['close_price'].to_dict()
+                logging.warning(f"fdr.StockListing('KRX') error : \n{e}")
+
+                day_ago_close = latest_closing_prices.set_index('code')['close_price'].to_dict()
                 latest_df, reupdate, invalid = get_latest_stock_data(base_date, df_codes, day_ago_close, market)
                 latest_df = latest_df[latest_df['Code'].isin(df_codes['code'].values)]
-                
-                duplicated_rows = latest_df[latest_df.duplicated(subset='Code', keep=False)]
-                # logging.info(f"duplicated_rows\n{duplicated_rows}")
                 latest_df = latest_df.drop_duplicates(subset='Code')
 
             if reupdate:
@@ -370,7 +363,7 @@ def update_stock_data(base_date, market, month=130, recreate=False):
             for code in reupdate:
                 logging.info(f"유상증자, 무상증자, 액면분할로 주가가 변경된 종목 : {code}")
                 try:
-                    new_data_df = get_stock_data_fdr(code, start_date, end_date) # 일단 11년치 다 불러오기 (어차피 주말에 조정됨)
+                    new_data_df = get_stock_data_fdr(code, start_date, end_date, market) # 일단 11년치 다 불러오기 (어차피 주말에 조정됨)
                 except Exception as e:
                     logging.info(f"Error occurred while fetching data for {code}: {e}")
                     continue
@@ -385,6 +378,7 @@ def update_stock_data(base_date, market, month=130, recreate=False):
             latest_df['Low'] = latest_df['Low'].astype('int', errors='ignore')
             latest_df['Close'] = latest_df['Close'].astype('int', errors='ignore')
             latest_df['Change'] = latest_df['Change'].astype('float', errors='ignore')
+            logging.info(f"nan list \n {latest_df[latest_df.isna().any(axis=1)]}")
             rows_to_insert_today = [{
                 "code": row['Code'],
                 "date": today,
@@ -402,6 +396,12 @@ def update_stock_data(base_date, market, month=130, recreate=False):
                             :volume,:change_rate)"""
             
             connection.execute(text(insert_query), rows_to_insert_today)
+
+            data_len = len(latest_df)
+
+        if data_len == 0:
+            connection.execute(text("ROLLBACK;"))
+            raise Exception(f"삽입된 주가데이터가 없습니다.")
 
         # 가끔 고가와 저가가 적용이 잘 안되는 경우가 발생해서 제데로 적용해주기
         query = text(f"update stock_data_{market} set high_price = open_price where open_price > high_price;")

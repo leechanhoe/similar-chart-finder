@@ -40,13 +40,21 @@ def pattern_search():
     naver_url = _get_naver_url(code, market)
 
     logging.info(f"visited {PAGE_NAME} : {name}({code}) / {base_date}")
-    return render_template(f'{PAGE_NAME}.html', base_date=base_date, code=code, name=name,
-                           market=market, after_close_change_5=after_close_change_5,
-                           after_close_change_10=after_close_change_10,
-                           lang=lang, translations=translations[lang],
-                           first_pattern_day=first_pattern_day,
-                           naver_url=naver_url,
-                           popular_ranking=get_popular_ranking(market, with_name=lang))
+
+    template_kwargs = {
+        'base_date': base_date,
+        'code': code,
+        'name': name,
+        'market': market,
+        'after_close_change_5': after_close_change_5,
+        'after_close_change_10': after_close_change_10,
+        'lang': lang,
+        'translations': translations[lang],
+        'first_pattern_day': first_pattern_day,
+        'naver_url': naver_url,
+        'popular_ranking': get_popular_ranking(market, with_name=lang)
+    }
+    return render_template(f'{PAGE_NAME}.html', **template_kwargs)
 
 # 5일 후와 10일 후 변동률 반환
 def _get_after_close_change_5_10(stock_data, base_date):

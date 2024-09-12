@@ -25,7 +25,7 @@ def is_market_open(date, market, max_retries=5, retry_delay=3):
 
         for attempt in range(max_retries):
             try:
-                all_open_date = fdr.DataReader(fdr.StockListing('NASDAQ')['Symbol'].iloc[0]).index[:].strftime('%Y-%m-%d').tolist()
+                all_open_date = get_stock_data_fdr("IXIC", date_str, date_str, market).index[:].strftime('%Y-%m-%d').tolist()
                 break  # 성공 시 루프를 빠져나감
             except Exception as e:
                 logging.info(f"is_market_open - error \n {e}")
@@ -35,8 +35,10 @@ def is_market_open(date, market, max_retries=5, retry_delay=3):
                     raise  # 최대 재시도 횟수에 도달하면 예외를 다시 던짐
 
     if calendar.is_session(date) and date_str in all_open_date:
+        logging.info(f"Market is open")
         return True  # Market is open
     else:
+        logging.info(f"Market is closed")
         return False  # Market is closed
 
 # 종목 코드 리스트 업데이트
@@ -77,7 +79,7 @@ def update_code_list(market):
 
     if len(df_codes) < 1000: # 종목 개수가 1000개 이하면 라이브러리 버그 의심
         logging.warn(f"update_code_list_{market} 종목 개수 경고 : {len(df_codes)}개 - 오류 의심")
-        return
+        raise Exception(f"종목 개수가 {len(df_codes)}개로, 정상적이지 않습니다. 오류를 확인하세요.")
 
     df_codes = df_codes.rename(columns={'Symbol': 'Code'})
     df_codes = df_codes[['Code', 'Name', 'Rank', 'Industry']]
@@ -159,7 +161,7 @@ def get_latest_stock_data(base_date, df_codes, day_ago_close, market):
         FROM stock_data_{market}
         """
     start_date = pd.read_sql_query(latest_date_query, engine).iat[0,0].strftime('%Y-%m-%d')
-    end_date = (base_date + relativedelta(days=1)).strftime('%Y-%m-%d')
+    end_date = base_date.strftime('%Y-%m-%d')
     base_date = base_date.strftime('%Y-%m-%d')
 
     df_list = []
@@ -169,7 +171,7 @@ def get_latest_stock_data(base_date, df_codes, day_ago_close, market):
     for i, row in df_codes.iterrows():
         code = row['code']
         
-        stock_price = get_stock_data_fdr(code, start_date, end_date)
+        stock_price = get_stock_data_fdr(code, start_date, end_date, market)
         if len(stock_price) == 0:
             invalid.append(code)
             continue
@@ -234,7 +236,7 @@ def update_stock_data(base_date, market, month=130, recreate=False):
     engine = get_engine()
     df_codes = get_stock_code(market)
 
-    end_date = (base_date + relativedelta(days=1)).strftime('%Y-%m-%d')
+    end_date = base_date.strftime('%Y-%m-%d')
     start_date = (base_date - relativedelta(months=month)).strftime('%Y-%m-%d')
     start_date2 = (base_date - relativedelta(months=12)).strftime('%Y-%m-%d')
 
@@ -245,6 +247,8 @@ def update_stock_data(base_date, market, month=130, recreate=False):
         count_records_query_result = connection.execute(
             text(f"SELECT COUNT(*) FROM stock_data_{market} LIMIT 1"))
         count_records_total = count_records_query_result.fetchone()[0]
+
+        data_len = 0
         if count_records_total == 0: # 데이터베이스에 데이터가 없는상태면 다 넣어주기
             invalid = []
             compared_code_list = get_compared_code_list(market)
@@ -258,7 +262,8 @@ def update_stock_data(base_date, market, month=130, recreate=False):
             for idx, row in df_codes.iterrows():
                 code = row['code']
                 start = start_date if row['compared'] else start_date2
-                new_data_df = get_stock_data_fdr(code, start, end_date)
+                new_data_df = get_stock_data_fdr(code, start, end_date, market)
+                data_len += len(new_data_df)
                 if len(new_data_df) == 0:
                     invalid.append(code)
                     continue
@@ -315,7 +320,7 @@ def update_stock_data(base_date, market, month=130, recreate=False):
 
             for code in reupdate:
                 logging.info(f"유상증자, 무상증자, 액면분할로 주가가 변경된 종목 : {code}")
-                new_data_df = get_stock_data_fdr(code, start_date, end_date) # 일단 11년치 다 불러오기 (어차피 주말에 조정됨)
+                new_data_df = get_stock_data_fdr(code, start_date, end_date, market) # 일단 11년치 다 불러오기 (어차피 주말에 조정됨)
 
                 if len(new_data_df) == 0:
                     logging.info(f"{code} 의 정보가 없음")
@@ -335,13 +340,16 @@ def update_stock_data(base_date, market, month=130, recreate=False):
             logging.info(f"유효하지 않은 종목 {len(invalid)}개")
             
             today = base_date.strftime('%Y-%m-%d')
+            logging.info(f"nan list \n {latest_df[latest_df.isna().any(axis=1)]}")
+            latest_df = latest_df.dropna(subset=['Open', 'High', 'Low', 'Close', 'Volume'], how='all')
+            
             rows_to_insert_today = [{
                 "code": row['Code'],
                 "date": today,
-                "open_price" :row['Close'] if row['Open'] == 0 else row['Open'],
-                "high_price" :row['Close'] if row['High'] == 0 else row['High'],
-                "low_price" :row['Close'] if row['Low'] == 0 else row['Low'],
-                "close_price" :row['Close'],
+                "open_price" : None if pd.isna(row['Open']) else (row['Close'] if row['Open'] == 0 else row['Open']),
+                "high_price" : None if pd.isna(row['High']) else (row['Close'] if row['High'] == 0 else row['High']),
+                "low_price" : None if pd.isna(row['Low']) else (row['Close'] if row['Low'] == 0 else row['Low']),
+                "close_price" :None if pd.isna(row['Close']) else row['Close'],
                 "volume" :None if pd.isna(row['Volume']) else int(row['Volume']),
                 "change_rate" :None if row['Code'] not in day_ago_close.keys() else (row['Close'] - day_ago_close[row['Code']]) / day_ago_close[row['Code']]}
                 for idx, row in latest_df.iterrows()]
@@ -353,6 +361,12 @@ def update_stock_data(base_date, market, month=130, recreate=False):
             
             connection.execute(text(insert_query), rows_to_insert_today)
 
+            data_len = len(latest_df)
+
+        if data_len == 0:
+            connection.execute(text("ROLLBACK;"))
+            raise Exception(f"삽입된 주가데이터가 없습니다.")
+        
         # 가끔 고가와 저가가 적용이 잘 안되는 경우가 발생해서 제데로 적용해주기
         query = text(f"update stock_data_{market} set high_price = open_price where open_price > high_price;")
         connection.execute(query)

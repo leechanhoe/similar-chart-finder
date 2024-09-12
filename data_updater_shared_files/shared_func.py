@@ -7,36 +7,31 @@ from pyfile.data_reader import update_cache_code_name_industry_url, get_comparab
 from dateutil.relativedelta import relativedelta
 from sqlalchemy import text
 from pyfile.image_manager import update_index_image
-from pyfile.drawing_search import save_interval
 from image_deleter import delete_result_image
+from get_stock_data import get_stock_data_fdr
 import pandas as pd
-import FinanceDataReader as fdr
 import logging
 import time
 
-# 모든 작업이 끝나고 매일 해줘야 할것들
-def declare_completion(date, market):
+def update_caches(date, market):
+    # 상승&하락율 랭킹 업데이트
     get_up_down_ranking(market, cache_update=True)
+
+    # 종목별 동일업종 리스트 업데이트
     get_same_industry_code('', market, cache_update=True)
 
     # 8일치 이상이 되어 비교가 가능한 종목리스트 업데이트
     get_comparable_code_list(market, cache_update=True)
     get_compared_code_list(market, cache_update=True)
 
+    update_latest_date(date, market)
+
+def delete_old_data(date, market):
     # stock_info 페이지에 나오는 main_chart 캐시들 삭제
     delete_stock_info_main_chart(market)
-    update_latest_date(date, market)
 
     delete_result_image(date, market)
     delete_old_similar_data(date, market)
-
-    # 간헐적으로 지워지지 않는 오류로 자주 삭제
-    delete_stock_info_main_chart(market)
-
-    # 드로잉 검색을 위한 파일 최신 업데이트
-    save_interval(market)
-    
-    load_index_data(market, date)
 
     # 간헐적으로 지워지지 않는 오류로 자주 삭제
     delete_stock_info_main_chart(market)
@@ -50,14 +45,15 @@ def update_latest_date(date, market):
     redis.set(key, date_str)
 
 # 메인 페이지의 코스피or나스닥 지수 이미지 업데이트
-def load_index_data(market, start_date):
+def load_index_data(start_date, market):
     symbol = 'KS11' if market == 'kospi_daq' else 'IXIC'
     max_attempts = 5
     attempt = 0
     
     while attempt < max_attempts:
         try:
-            data = fdr.DataReader(symbol, (start_date - relativedelta(years=1)).strftime('%Y-%m-%d')).iloc[-83:]
+            data = get_stock_data_fdr(symbol, (start_date - relativedelta(years=1)).strftime('%Y-%m-%d'), 
+                                      start_date.strftime('%Y-%m-%d'), market, index=True).iloc[-83:]
             
             # Low보다 Close나 Open이 낮은 경우를 찾아 Low로 설정합니다.
             data['Close'] = data.apply(lambda row: row['Low'] if row['Close'] < row['Low'] else row['Close'], axis=1)

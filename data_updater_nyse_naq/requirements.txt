@@ -13,3 +13,4 @@ pytz
 redis
 scipy
 googletrans==4.0.0rc1
+yfinance

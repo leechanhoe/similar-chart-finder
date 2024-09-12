@@ -60,11 +60,27 @@ def result():
     
     _up_view(market, code)
     logging.info(f"visited {PAGE_NAME} : ({get_name(code, market, lang)}){code} {base_date} {day_num} mean : {after_close_mean}")
-    return render_template(f'{PAGE_NAME}.html', code=code, base_date=base_date, name=name, market=market, day_num=str(day_num), after_close_mean=after_close_mean,
-                           predict_day=get_predict_day(day_num), similar_chart_list=similar_chart_list, base_industry=get_industry(code, market, lang), lang=lang,
-                           translations=translations[lang], popular_ranking=get_popular_ranking(market, with_name=lang),
-                           valid_day_num=valid_day_num, similar_data_range=similar_data_range,
-                           update_date=update_date, naver_url=naver_url)
+    
+    template_kwargs = {
+        'code': code,
+        'base_date': base_date,
+        'name': name,
+        'market': market,
+        'day_num': str(day_num),
+        'after_close_mean': after_close_mean,
+        'predict_day': get_predict_day(day_num),
+        'similar_chart_list': similar_chart_list,
+        'base_industry': get_industry(code, market, lang),
+        'lang': lang,
+        'translations': translations[lang],
+        'popular_ranking': get_popular_ranking(market, with_name=lang),
+        'valid_day_num': valid_day_num,
+        'similar_data_range': similar_data_range,
+        'update_date': update_date,
+        'naver_url': naver_url
+    }
+    return render_template(f'{PAGE_NAME}.html', **template_kwargs)
+
 
 @bp.route('/detail', methods=['GET'])
 def detail():
@@ -97,11 +113,23 @@ def detail():
     detail_chart = draw_detail_chart(compare_stock_code, compare_date, market, day_num, lang)
 
     logging.info(f"visited detail_chart : (base: {get_name(base_stock_code, market, lang)}){base_stock_code} {base_date} {day_num} / compare : {get_name(compare_stock_code, market, lang)}){compare_stock_code}")
-    return render_template(f'detail_chart.html', base_date=base_date, base_stock_code=base_stock_code, 
-                           market=market, day_num=str(day_num), after_close_change=result['after_close_change'].iloc[0],
-                           compare_stock_code=compare_stock_code, compare_stock_name=compare_stock_name, 
-                           compare_date=compare_date, detail_chart=detail_chart, predict_day=get_predict_day(day_num), 
-                           lang=lang, translations=translations[lang], popular_ranking=get_popular_ranking(market, with_name=lang))
+    template_kwargs = {
+        'base_date': base_date,
+        'base_stock_code': base_stock_code,
+        'market': market,
+        'day_num': str(day_num),
+        'after_close_change': result['after_close_change'].iloc[0],
+        'compare_stock_code': compare_stock_code,
+        'compare_stock_name': compare_stock_name,
+        'compare_date': compare_date,
+        'detail_chart': detail_chart,
+        'predict_day': get_predict_day(day_num),
+        'lang': lang,
+        'translations': translations[lang],
+        'popular_ranking': get_popular_ranking(market, with_name=lang)
+    }
+
+    return render_template('detail_chart.html', **template_kwargs)
 
 def _up_view(market, code):
     key = f'views_{market}_{code}'

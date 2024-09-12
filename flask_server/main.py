@@ -60,10 +60,17 @@ def index():
     market = 'kospi_daq' if lang == 'ko' else 'nyse_naq'
     range_low = get_rise_ratio('~ -4')
     range_high = get_rise_ratio('6 ~')
+
     logging.info(f"visited index : lang : {lang}")
-    return render_template('index.html', lang=lang, translations=translations[lang],
-                           range_low=range_low, range_high=range_high,
-                           popular_ranking=get_popular_ranking(market, with_name=lang))
+
+    template_kwargs = {
+        'lang': lang,
+        'translations': translations[lang],
+        'range_low': range_low,
+        'range_high': range_high,
+        'popular_ranking': get_popular_ranking(market, with_name=lang)
+    }
+    return render_template('index.html', **template_kwargs)
 
 @app.errorhandler(400)
 @app.errorhandler(403)

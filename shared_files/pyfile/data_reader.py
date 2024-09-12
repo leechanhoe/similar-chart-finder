@@ -28,13 +28,13 @@ def update_cache_stock_code(market, valid=True):
 
     if valid:
         # Load all data from the table
-        df_code = pd.read_sql(f"SELECT code, ranking FROM stock_code_list_{market} WHERE valid=1", engine)
+        df_code = pd.read_sql(f"SELECT code, ranking FROM stock_code_list_{market} WHERE valid=1 ORDER BY ranking", engine)
         key = f"valid_stock_codes_{market}"
         redis.set(key, df_code.to_json())
         logging.info(f"Completed updating the valid_cache_stock_code - {market}")
 
     else:
-        df_code = pd.read_sql(f"SELECT * FROM stock_code_list_{market}", engine)
+        df_code = pd.read_sql(f"SELECT * FROM stock_code_list_{market} ORDER BY ranking", engine)
         code_list = df_code['code'].to_list()
         key = f"all_code_list_{market}"
         redis.set(key, json.dumps(code_list))
@@ -68,7 +68,7 @@ def get_stock_code(market, only_code=False, only_valid=True, cache_update=False)
                 code_list = json.loads(code_list)
             return code_list
         else:
-            df_code = pd.read_sql(f"SELECT * FROM stock_code_list_{market}", engine)
+            df_code = pd.read_sql(f"SELECT * FROM stock_code_list_{market} ORDER BY ranking", engine)
             return df_code
 
 # 종목명 레디스 캐시 업데이트

@@ -7,7 +7,7 @@ import shutil
 from bs4 import BeautifulSoup
 from requests.exceptions import RequestException
 from pyfile.db_engine import get_redis, get_engine
-from pyfile.data_reader import get_investing_url_all, get_all_name, get_all_industry
+from pyfile.data_reader import get_investing_url_all, get_all_name, get_all_industry, get_stock_code
 from pyfile.data_reader import update_cache_stock_name, update_cache_stock_industry, update_cache_investing_url, update_cache_naver_url
 from pyfile.image_manager import draw_statistics_chart
 from pyfile.statistics_reader import get_statistics_stocks, get_valid_statistics_list
@@ -33,7 +33,11 @@ def update_popular_stock(market):
     if market == 'kospi_daq':
         # 한국
         url = 'https://finance.naver.com/sise/lastsearch2.naver'
-        response = requests.get(url)
+        try:
+            response = requests.get(url)
+        except Exception as e:
+            logging.error(f"update_popular_stock_kospi_daq error {e}")
+            return
         # BeautifulSoup 객체 생성
         soup = BeautifulSoup(response.text, 'html.parser')
         # class가 "tltle"인 a 태그의 리스트를 가져옴
@@ -44,41 +48,45 @@ def update_popular_stock(market):
         kospi_daq_codes = kospi_daq_codes[:10]
 
         if len(kospi_daq_codes) != 10:
-            logging.info(f"popular_kospi_daq_codes length is not 10: {kospi_daq_codes}")
-            return None
+            logging.warn(f"popular_{market}_codes length is not 10: {kospi_daq_codes}")
+            kospi_daq_codes = get_stock_code(market, only_code=True)[:10]
 
-        kospi_daq_data = get_statistics_stocks(kospi_daq_codes, 'kospi_daq')
-        draw_statistics_chart(kospi_daq_data, 'kospi_daq', 64, 'popular_ranking_kospi_daq')
-        key = 'popular_kospi_daq'
+        kospi_daq_data = get_statistics_stocks(kospi_daq_codes, market)
+        draw_statistics_chart(kospi_daq_data, market, 64, f'popular_ranking_{market}')
+        key = f'popular_{market}'
         redis.set(key, kospi_daq_data.to_json())
 
-        logging.info(f"update popular_kospi_daq: {kospi_daq_codes}")
+        logging.info(f"update popular_{market}: {kospi_daq_codes}")
         return kospi_daq_data
     
     elif market == 'nyse_naq':
         # 미국
-        url = "https://finance.yahoo.com/most-active/"
+        url = "https://finance.yahoo.com/markets/stocks/most-active/"
         headers = {"User-Agent": "Mozilla/5.0"}  # investing.com은 헤더가 없으면 접근을 제한합니다.
-        response = requests.get(url, headers=headers)
+        try:
+            response = requests.get(url, headers=headers)
+        except Exception as e:
+            logging.error(f"update_popular_stock_nyse_naq error {e}")
+            return
         # BeautifulSoup 객체 생성
         soup = BeautifulSoup(response.text, 'html.parser')
         # class가 'CommTable_name__'으로 시작하는 span 태그의 리스트를 가져옴
-        tags = soup.find_all('a', {'class': "Fw(600)", 'data-test': "quoteLink"})
+        tags = soup.find_all('span', {'class': "symbol"})
         # 각 태그에서 텍스트를 가져와 리스트에 저장
         nyse_naq_codes = [tag.text for tag in tags]
         nyse_naq_codes = [code for code in nyse_naq_codes if code in valid_code_list]
         nyse_naq_codes = nyse_naq_codes[:10]
 
         if len(nyse_naq_codes) != 10:
-            logging.info(f"popular_nyse_naq_codes length is not 10: {nyse_naq_codes}")
-            return None
+            logging.warn(f"popular_{market}_codes length is not 10: {nyse_naq_codes}")
+            nyse_naq_codes = get_stock_code(market, only_code=True)[:10]
 
-        nyse_naq_data = get_statistics_stocks(nyse_naq_codes, 'nyse_naq')
-        draw_statistics_chart(nyse_naq_data, 'nyse_naq', 64, 'popular_ranking_nyse_naq')
-        key = 'popular_nyse_naq'
+        nyse_naq_data = get_statistics_stocks(nyse_naq_codes, market)
+        draw_statistics_chart(nyse_naq_data, market, 64, f'popular_ranking_{market}')
+        key = f'popular_{market}'
         redis.set(key, nyse_naq_data.to_json())
 
-        logging.info(f"update popular_nyse_naq: {nyse_naq_codes}")
+        logging.info(f"update popular_{market}: {nyse_naq_codes}")
         return nyse_naq_data
 
 # 웹 스크래핑으로 인베스팅닷컴 url 가져오기
@@ -168,35 +176,43 @@ def update_translated_name(market):
         raise Exception("Null row(s) exist in the 'code' column of the df_name dataframe", null_rows)
 
     if market == 'kospi_daq':
-        df_name = df_name.merge(get_investing_url_all(market), on='code', how='left') # investing url을 df_name에 붙이기
+        # df_name = df_name.merge(get_investing_url_all(market), on='code', how='left') # investing url을 df_name에 붙이기
         for idx, row in df_name.iterrows():
             try:
-                url = base_url + row['url']
+                url = f"https://www.forecaster.biz/instrument/ksc/{row['code']}.ks/fundamentals"
             except Exception as e:
                 logging.error(f"{base_url} + {row['url']} ? {e}")
                 continue
-            for i in range(10):
+            for i in range(2):
                 try:
                     response = requests.get(url, headers=headers)
                     # BeautifulSoup 객체 생성
                     soup = BeautifulSoup(response.text, 'html.parser')
                     # class가 text-[#232526]인 h1 태그의 리스트를 가져옴
-                    result = soup.find('h1', {'class': "text-[#232526]"})
+                    result = soup.find('h1', {'class': "select-text"})
                     if result is not None:  # None 검사 추가
-                        new_name = " ".join(result.text.split()[:-1])
+                        new_name = result.text
+                        for check in ['Co.', 'co.', 'CO.']:
+                            if check in new_name:
+                                new_name = new_name.split(check)[0]
+                                break
                         if len(new_name) == 0:
                             logging.warning(f"{idx}. {row['code']}({row[f'name_{lang}']})'s name_{lang_another} is blank!")
                         else:
                             df_name.at[idx, f'name_{lang_another}'] = new_name
                             logging.info(f"{idx}. update name_{lang_another} : {row['code']} to {new_name}")
+                            break
                     else:
-                        logging.info(f"No name for {row['code']}")
-                    break  # 성공적으로 데이터를 가져오면 재시도 루프를 빠져나옵니다.
+                        url = f"https://www.forecaster.biz/instrument/koe/{row['code']}.kq/fundamentals"
+                        continue
+
+                    logging.info(f"No name for {row['code']}")
+                    
                 except RequestException as e:
                     logging.info(f"Request to {url} failed, retrying {i} in 1 seconds...")
                     time.sleep(0.3)  # 잠시 대기 후 재시도합니다.
 
-            time.sleep(0.1)
+            time.sleep(0.2)
         
     elif market == 'nyse_naq':
         df_name['url'] = ''
