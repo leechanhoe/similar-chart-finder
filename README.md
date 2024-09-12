@@ -8,6 +8,7 @@
 <br>
 <br>
 <br>
+<br>
  
 ## 주요기능
 - 8, 16, 32, 64, 128일 치의 다양한 비교 결과 제공
@@ -25,9 +26,11 @@
 ## 성과
 - MAU 8000 / 하루 평균 트래픽 8000
 - 전 세계 사용자 유치(미국 62.56%, 싱가포르 17.63%, 한국 10.75%, 기타 9.06%)
-- 5달간의 실제 공개 검증 결과 과거 비슷한 차트가 상승하는 경우가 많은 특정 종목들에 대해 정확도 60% 이상의 주가 예측 성공 -> 차트 분석이 주가 예측에 도움을 주는 것을 증명
+- 비슷한 차트들이 주가 예측에 도움을 주는 것을 검증 (https://www.similarchart.com/validation)
 
+<img width="716" alt="mau" src="https://github.com/user-attachments/assets/02458093-27ea-4238-b2a4-df214a1e0134">
 
+<br>
 <br>
 <br>
 <br>
@@ -39,6 +42,7 @@
 <br>
 <br>
 <br>
+<br>
 
 ## 시스템 아키텍처
 
@@ -46,6 +50,7 @@
 
 관련 글 : https://blog.similarchart.com/140
 
+<br>
 <br>
 <br>
 <br>
@@ -63,5 +68,7 @@
 <br>
 <br>
 <br>
+<br>
 
-## Airflow를 도입하여 리팩토링 예정
+## Airflow 도입 검토중
+[관련 블로그 글](https://blog.similarchart.com/253)
