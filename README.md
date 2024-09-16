@@ -24,11 +24,14 @@
 <br>
 
 ## 성과
-- MAU 8000 / 하루 평균 트래픽 8000
-- 전 세계 사용자 유치(미국 62.56%, 싱가포르 17.63%, 한국 10.75%, 기타 9.06%)
+- 하루 평균 트래픽 8800 (미국 62.08%, 싱가포르 17.14%, 한국 10.63%, 기타 10.15%)
+- MAU 8700
 - 비슷한 차트들이 주가 예측에 도움을 주는 것을 검증 (https://www.similarchart.com/validation)
 
-<img width="716" alt="mau" src="https://github.com/user-attachments/assets/02458093-27ea-4238-b2a4-df214a1e0134">
+<img width="679" alt="MAU" src="https://github.com/user-attachments/assets/fb73ebaf-7c87-46a7-b93b-9b27763c36c8">
+
+<img width="679" alt="traffic" src="https://github.com/user-attachments/assets/fca0bd3d-5edb-4ca4-9b31-e6f7ddc80562">
+
 
 <br>
 <br>
@@ -70,5 +73,5 @@
 <br>
 <br>
 
-## Airflow 도입 검토중
+## Airflow 도입 검토 중
 [관련 블로그 글](https://blog.similarchart.com/253)
