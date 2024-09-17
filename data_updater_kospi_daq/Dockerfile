@@ -5,8 +5,7 @@ FROM python:3.12-slim-bookworm
 WORKDIR /app 
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt 
-RUN pip install flask sqlalchemy pymysql cryptography
+RUN pip install --no-cache-dir -r requirements.txt
 
 # PYTHONPATH 환경 변수 설정
 ENV PYTHONPATH "${PYTHONPATH}:/app/shared_files"

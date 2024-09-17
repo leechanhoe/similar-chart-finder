@@ -17,3 +17,4 @@ googletrans==4.0.0rc1
 flask-login
 bcrypt
 exchange_calendars
+cryptography

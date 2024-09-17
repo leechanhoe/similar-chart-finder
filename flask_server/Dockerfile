@@ -1,4 +1,4 @@
-FROM python:3.10-slim-buster
+FROM python:3.12-slim-bookworm
 
 WORKDIR /app 
 
@@ -10,7 +10,6 @@ ENV PYTHONPATH "${PYTHONPATH}:/app/shared_files"
 
 # Matplotlib font cache 제거
 RUN rm -rf ~/.cache/matplotlib
-RUN pip install flask sqlalchemy pymysql cryptography
 
 # 이 부분에 빈 디렉토리를 생성하는 명령어를 추가합니다.
 RUN mkdir -p /app/shared_files/nginx_cache/
