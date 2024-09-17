@@ -69,7 +69,7 @@ def stock_info():
     draw_stock_info_charts(code, data['date'], market, lang)
 
     score, gauge_name = _get_score(data, lang, market)
-    _plus_view(code, market)
+    plus_view(code, market)
     investing_url, naver_url = get_url(code, market, lang)
     same_industry = _get_same_industry(code, market, lang)
     valid_day_num = get_valid_day_num(code, 0, market)
@@ -107,16 +107,11 @@ stock_bp = Blueprint('stock', __name__, url_prefix='/stock')
 stock_bp.add_url_rule('/', view_func=stock_info, endpoint='stock')
 
 # 조회수 상승
-def _plus_view(code, market):
+def plus_view(code, market):
     key = f'views_{market}_{code}'
     redis = get_redis()
-    # Redis에서 데이터를 가져옵니다.
-    views = redis.get(key)
-    # Redis에 데이터가 없는 경우에만 데이터베이스에서 데이터를 가져옵니다.
-    if views is None:
-        redis.set(key, '1')  # 데이터를 Redis에 저장합니다.
-    else:
-        redis.incr(key)
+    # Redis에서 데이터가 없는 경우 초기값을 1로 설정하고, 있으면 값을 증가시킵니다.
+    redis.incr(key)
 
 def get_url(code, market, lang):
     # 사용자에게 해당 링크로 리다이렉트. 사용자의 언어 설정에 따라 URL이 달라집니다.

@@ -1,13 +1,12 @@
 from flask import request, Blueprint, render_template
 from pyfile.data_reader import get_predict_day, get_name, get_industry, get_valid_day_num
 from pyfile.similar_data_reader import get_similar_chart, get_one_comparison_result, get_similar_data_range
-from pyfile.db_engine import get_redis
 from pyfile.data_reader import get_latest_update_date
 from translation import translations
 from popular_ranking import get_popular_ranking
 from validation_value import validate_lang, validate_market, validate_day_num, validate_code, validate_date_format
 from  pyfile.image_manager import update_result_images, draw_detail_chart
-from controller.stock_info import get_url
+from controller.stock_info import get_url, plus_view
 import main
 import logging
 
@@ -58,7 +57,7 @@ def result():
     valid_day_num = get_valid_day_num(code, day_num, market)
     investing_url, naver_url = get_url(code, market, lang)
     
-    _up_view(market, code)
+    plus_view(market, code)
     logging.info(f"visited {PAGE_NAME} : ({get_name(code, market, lang)}){code} {base_date} {day_num} mean : {after_close_mean}")
     
     template_kwargs = {
@@ -130,17 +129,6 @@ def detail():
     }
 
     return render_template('detail_chart.html', **template_kwargs)
-
-def _up_view(market, code):
-    key = f'views_{market}_{code}'
-    redis = get_redis()
-    # Redis에서 데이터를 가져옵니다.
-    views = redis.get(key)
-    # Redis에 데이터가 없는 경우에만 데이터베이스에서 데이터를 가져옵니다.
-    if views is None:
-        redis.set(key, '1')  # 데이터를 Redis에 저장합니다.
-    else:
-        redis.incr(key)
 
 def get_param(param_name):
         return request.args.get(param_name) or request.args.get(param_name.replace('-', '_'))
