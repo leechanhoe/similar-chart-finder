@@ -12,5 +12,5 @@ exchange_calendars
 html5lib
 redis
 scipy
-googletrans==4.0.0rc1
+googletrans
 yfinance

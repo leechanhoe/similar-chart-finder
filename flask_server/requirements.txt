@@ -13,7 +13,7 @@ gunicorn
 scipy
 redis
 requests
-googletrans==4.0.0rc1
+googletrans
 flask-login
 bcrypt
 exchange_calendars
