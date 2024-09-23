@@ -59,6 +59,8 @@
 <br>
 
 ## 폴더별 소스코드
+소스코드의 일부분입니다. 보안적으로 중요한 부분은 제외하였습니다.
+
 - **`data_updater_kospi_daq`** : 한국 주식 ETL 데이터 파이프라인
 - **`data_updater_nyse_naq`** : 미국 주식 ETL 데이터 파이프라인
 - **`data_updater_shared_files`** : data_updater 컨테이너들이 공유하는 파일
