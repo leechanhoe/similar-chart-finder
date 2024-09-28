@@ -31,7 +31,7 @@ def get_stock_data_fdr(code, start, end, market, index=False):
         executor = concurrent.futures.ThreadPoolExecutor()
         future = executor.submit(get_data, code, start, end)
         try:
-            new_data_df = future.result(timeout=2)
+            new_data_df = future.result(timeout=5)
             break  # 성공적으로 데이터를 가져왔다면 while 문을 벗어남
         except concurrent.futures.TimeoutError:
             logging.info(f"{code}에서 시간 초과로 인한 오류 발생, 재시도 중..")

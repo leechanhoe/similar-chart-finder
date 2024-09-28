@@ -24,7 +24,7 @@ def is_market_open(date, market, max_retries=5, retry_delay=3):
 
     for attempt in range(max_retries):
         try:
-            all_open_date = get_stock_data_fdr("KS11", date_str, date_str, market).index[:].strftime('%Y-%m-%d').tolist()
+            all_open_date = get_stock_data_fdr("KS11", '2000-01-01', date_str, market).index[:].strftime('%Y-%m-%d').tolist()
             break  # 성공 시 루프를 빠져나감
         except Exception as e:
             logging.info(f"is_market_open - error \n {e}")

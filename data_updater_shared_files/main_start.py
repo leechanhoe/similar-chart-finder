@@ -40,7 +40,7 @@ def _market_close_day(market, start_time):
         
         # url, name, industry 일주일에 한번씩 전체삭제후 업데이트 해주기
         update_investing_url(get_stock_code(market, only_code=True), market, recreate=True)
-        update_translated_name(market)
+        # update_translated_name(market)
         update_industry_en(market)
 
         save_pattern(start_time, market, 4) # 패턴 검색을 위한 데이터 갱신

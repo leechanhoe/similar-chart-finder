@@ -1,5 +1,4 @@
 from pyfile.data_reader import get_name, get_predict_day
-from pyfile.similar_data_reader import get_similar_chart
 from pyfile.stock_data_reader import get_stock_data_pre_fol
 from mplfinance.original_flavor import candlestick_ohlc
 from matplotlib.patches import Patch
@@ -27,14 +26,13 @@ class InsufficientDataError(Exception):
     pass
 
 # result 페이지의 두 이미지 생성
-def update_result_images(code, base_date, market, day_num, lang):
+def update_result_images(code, base_date, market, day_num, lang, similar_data):
     if ((os.path.exists(f'/app/shared_files/static/image_data/{market}/{base_date}/expected_chart_{code}_{base_date}_{str(day_num)}_{lang}.png')) and
         (os.path.exists(f'/app/shared_files/static/image_data/{market}/{base_date}/compare_chart_{code}_{base_date}_{str(day_num)}_{lang}.png'))):
         return
     plt.clf()
     plt.close("all")
     base_data = get_stock_data_pre_fol(code, base_date, market, preceding=day_num - 1)
-    similar_data = get_similar_chart(code, base_date, market, day_num)
 
     draw_expected_chart(code, base_date, similar_data, base_data, market, day_num, lang)
     draw_compare_chart(code, base_date, similar_data, market, day_num, lang)
@@ -212,14 +210,14 @@ def _draw_all_data_num_chart(code, market, lang, statistics_data, validation_dat
     plt.close("all")
 
 # 색상 혼합
-def alpha_blend(color1, color2, alpha):
+def _alpha_blend(color1, color2, alpha):
     return [
         int((color1[0] * alpha + color2[0] * (1 - alpha))),
         int((color1[1] * alpha + color2[1] * (1 - alpha))),
         int((color1[2] * alpha + color2[2] * (1 - alpha)))
     ]
 
-def convert_value(n): # 이동평균선 기준을 캔들 가운데에 위치시키기 위한 값
+def _convert_value(n): # 이동평균선 기준을 캔들 가운데에 위치시키기 위한 값
     if n == 64:
         return 3
     elif n == 32:
@@ -279,7 +277,7 @@ def convert_image(data, day_num, lang, center_yellow=False):
     stock_data_ma5 = (stock_data_ma5 - min_price) / max_min_dif
 
     adjust_width = 128 // day_num
-    adjust_width2 = convert_value(day_num)
+    adjust_width2 = _convert_value(day_num)
     for day in range(day_num):
         x_start_orig = day * 3 * adjust_width
         x_start = x_start_orig + (32 // day_num * 2) # (32 // day_num)은 캔들사이 간격을 주기 위함
@@ -367,7 +365,7 @@ def convert_image(data, day_num, lang, center_yellow=False):
                         if 0 <= y < height and x < width:
                             for y_offset in range(y - 4, y + 5):  # 이동평균선 주변에 블렌딩 처리
                                 if 0 <= y_offset < height:
-                                    new_color = alpha_blend([252, 190, 0], img[height - 1 - y_offset, x], 0.3)  # 노란색으로 변경
+                                    new_color = _alpha_blend([252, 190, 0], img[height - 1 - y_offset, x], 0.3)  # 노란색으로 변경
                                     img[height - 1 - y_offset, x] = new_color
 
             ma10_norm = stock_data_ma10.iloc[idx]
@@ -396,7 +394,7 @@ def convert_image(data, day_num, lang, center_yellow=False):
                         if 0 <= y < height and x < width:
                             for y_offset in range(y - 4, y + 5):  # 이동평균선 주변에 블렌딩 처리
                                 if 0 <= y_offset < height:
-                                    new_color = alpha_blend([48, 48, 48], img[height - 1 - y_offset, x], 0.3)  # 회색으로 변경
+                                    new_color = _alpha_blend([48, 48, 48], img[height - 1 - y_offset, x], 0.3)  # 회색으로 변경
                                     img[height - 1 - y_offset, x] = new_color
 
             ma5_norm = stock_data_ma5.iloc[idx]
@@ -425,7 +423,7 @@ def convert_image(data, day_num, lang, center_yellow=False):
                         if 0 <= y < height and x < width:
                             for y_offset in range(y - 4, y + 5):  # 이동평균선 주변에 블렌딩 처리
                                 if 0 <= y_offset < height:
-                                    new_color = alpha_blend([139, 0, 255], img[height - 1 - y_offset, x], 0.3)  # 노란색으로 변경
+                                    new_color = _alpha_blend([139, 0, 255], img[height - 1 - y_offset, x], 0.3)  # 노란색으로 변경
                                     img[height - 1 - y_offset, x] = new_color
 
     if day_num == 4: # 4일치를 그리는 경우는 오른쪽에 공백이 아예 없는것이 티가 나 8px만큼 생성

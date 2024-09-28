@@ -58,13 +58,13 @@ def update_statistics(base_date, market, save_period=36):
         # result_df = df.groupby('code').apply(lambda x: x.iloc[1:-1]['after_close_change'].mean()).reset_index() # 절사평균
         result_df.columns = ['code', f'average_{2**(i+3)}day']  # 'after_close_change' 컬럼 이름을 변경
         result_df_list.append(result_df)
-    # 결과를 합칩니다.
-    final_df = get_stock_code(market)
 
+    final_df = get_stock_code(market)
     # 중복된 'code' 값을 가진 행을 제거합니다. 첫 번째 중복 값만 남기고 나머지는 제거합니다.
     final_df = final_df.drop_duplicates(subset='code', keep='first')
-
     final_df = final_df[['code']]
+
+    # 날짜별 변동률의 평균을 구합니다.
     for next_df in result_df_list:
         final_df = final_df.merge(next_df, on='code', how='left')
     final_df['average_allday'] = final_df[[f'average_{day}day' for day in get_day_num_list()]].mean(axis=1, skipna=False)
@@ -79,8 +79,10 @@ def update_statistics(base_date, market, save_period=36):
         count_df = df.groupby('code').size().reset_index()
         count_df.columns = ['code', f'data_num_{2**(i+3)}day']
         final_df = final_df.merge(count_df, on='code', how='left')
+
     columns_to_fill = [[f'rise_count_{day}day' for day in get_day_num_list()] + [f'data_num_{day}day' for day in get_day_num_list()]]
     for column in columns_to_fill:
+        # object 타입으로 저장된 데이터에서 숫자를 추론하여, 이를 정수로 변환
         final_df[column] = final_df[column].fillna(0).infer_objects().astype(int)
     final_df['rise_count_allday'] = final_df[[f'rise_count_{day}day' for day in get_day_num_list()]].sum(axis=1, skipna=False)
     final_df['data_num_allday'] = final_df[[f'data_num_{day}day' for day in get_day_num_list()]].sum(axis=1, skipna=False)
@@ -91,7 +93,7 @@ def update_statistics(base_date, market, save_period=36):
     #소수점 2자리까지만
     cols_to_round = [f'average_{day}day' for day in get_day_num_list() + ['all']]
     final_df[cols_to_round] = final_df[cols_to_round].round(2)
-    # SQLAlchemy 트랜잭션을 시작합니다.
+    
     with engine.begin() as connection:
         # 테이블에서 date가 base_date로부터 한 달이 지난 데이터를 삭제합니다.
         old_date = (pd.to_datetime(base_date).date() - relativedelta(months=save_period)).strftime('%Y-%m-%d')

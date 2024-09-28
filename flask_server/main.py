@@ -35,8 +35,8 @@ login_manager.init_app(app)
 def inject_user_agent(): # 앱에서 온 요청인지 체크
     is_app = request.args.get('app', None) is not None
     user_agent = request.headers.get('SimilarChart-App')
-    if user_agent is not None or is_app:
-        logging.info('App request')
+    if is_app:
+        logging.info("App request")
     return dict(user_agent=user_agent, is_app=is_app)
 
 # @app.before_request
@@ -85,20 +85,21 @@ def page_not_found(e):
         lang = 'ko'
     else:
         lang = 'en'
-    # 이전 페이지 URL을 가져옵니다.
-    referrer = request.referrer
+
+    referrer = request.referrer # 이전 페이지 URL을 가져옵니다.
+    requested_url = request.url
+
     if referrer:
-        # 오류 페이지에 이전 페이지 URL을 전달합니다.
-        logging.info(f"visited error - lang : {lang} / referrer : {referrer}")
-        return render_template('error.html', translations=translations[lang], lang=lang, referrer=referrer)
+        logging.info(f"visited error - lang : {lang} / referrer : {referrer} / requested URL : {requested_url}")
     else:
-        logging.info(f"visited error - lang : {lang} / not referrer")
-        # Referrer가 없는 경우, 오류 페이지를 그대로 렌더링합니다.
+        logging.info(f"visited error - lang : {lang} / requested URL : {requested_url}")
+
         return render_template('error.html', translations=translations[lang], lang=lang)
 
 @app.errorhandler(404)
 def page_not_found404(e=None, lang=None):
     user_language = request.headers.get('Accept-Language')
+    
     if lang is None:
         if user_language and 'ko' in user_language:
             lang = 'ko'
@@ -106,9 +107,13 @@ def page_not_found404(e=None, lang=None):
             lang = 'en'
     
     referrer = request.referrer
+    requested_url = request.url
+    
     if referrer:
-        logging.info(f"visited error - lang : {lang} / referrer : {referrer}")
-        
+        logging.info(f"visited error - lang : {lang} / referrer : {referrer} / requested URL : {requested_url}")
+    else:
+        logging.info(f"visited error - lang : {lang} / requested URL : {requested_url}")
+    
     return render_template('error404.html', translations=translations[lang], lang=lang)
 
 if __name__ == '__main__':

@@ -123,6 +123,7 @@
                 <img src="{{ url_for('static', filename='image_data/static_image/logo_34x34_' + lang + '.png') }}" alt="Logo">
                 Similar Chart <span class="d-inline finder-text">Finder</span></a>
             
+            <!-- 검색 버튼 터치시 현재 시장이나 언어에 따라 알맞은 검색페이지로 이동 -->
             {% if market %}
                 {% set page = market %}
             {% else %}
@@ -146,6 +147,7 @@
                     {% if lang not in ['ko', 'en'] %}
                         {% set lang = 'ko' %}
                     {% endif %}
+                    <!-- 현재 페이지에 맞는 카테고리면 텍스트 밝게 표기 -->
                     <a class="nav-link {% if market|default('') == mkt or request.path == url_for(url) or mkt in request.path %}active{% endif %}" href="{{ url_for(url, lang=lang) }}" onclick="LoadingWithMask();">
                     {% if lang == 'en' %}
                         {{ name_en }}
@@ -196,14 +198,7 @@
             {% endif %}
         </div>
     </div>
-
-    <!-- <h6 style="text-align: center"><b>Beta Version</b></h6> -->
     {% endblock %}
-
-    <!-- Language Select, ads -->
-    {% block top %}
-    {% endblock %}
-
 
     <!-- Page Content -->
     {% block content %}{% endblock %}

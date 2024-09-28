@@ -9,8 +9,8 @@ import io
 VALIDATION_DAY = 10
 
 # score_range 정의
-score_ranges = [('-inf', -4), (-3.99, -3), (-2.99, -2), (-1.99, -1), (-0.99, 0), (0.01, 0.99), (1, 1.99), (2, 2.99), (3, 3.99), (4, 4.99), (5, 5.99), (6, 'inf')]
-score_range_labels = ['~ -4', '-3.9 ~ -3', '-2.9 ~ -2', '-1.9 ~ -1', '-0.9 ~ 0', '0.1 ~ 0.9', '1 ~ 1.9', '2 ~ 2.9', '3 ~ 3.9', '4 ~ 4.9', '5 ~ 5.9', '6 ~']
+SCORE_RANGES = [('-inf', -4), (-3.99, -3), (-2.99, -2), (-1.99, -1), (-0.99, 0), (0.01, 0.99), (1, 1.99), (2, 2.99), (3, 3.99), (4, 4.99), (5, 5.99), (6, 'inf')]
+SCORE_RANGE_LABELS = ['~ -4', '-3.9 ~ -3', '-2.9 ~ -2', '-1.9 ~ -1', '-0.9 ~ 0', '0.1 ~ 0.9', '1 ~ 1.9', '2 ~ 2.9', '3 ~ 3.9', '4 ~ 4.9', '5 ~ 5.9', '6 ~']
 MINUS_LABEL_NUM = 5
 
 # 검증 관련 데이터 갱신
@@ -182,6 +182,7 @@ def insert_new_data(date, market):
     
     logging.info(f"profit_after_{VALIDATION_DAY}day_{market} / {date} is inserted")
 
+# 장이 열린 유효날짜 리스트 반환
 def _get_valid_date(market):
     engine = get_engine()
 
@@ -194,6 +195,7 @@ def _get_valid_date(market):
     date_list = df_dates['date'].dt.strftime('%Y-%m-%d').tolist()
     return date_list
 
+# VALIDATION_DAY 거래일 전의 날짜 반환
 def _get_past_date(base_date, market):
     date_list = _get_valid_date(market)
     try:
@@ -219,7 +221,7 @@ def validate_profit(date, market):
     # 현재 날짜의 종목별 종가 가져오기
     close_price_now = _get_close_price(date, market)
     close_price_dict = close_price_now.set_index('code')['close_price'].to_dict()
-    # 현재 날짜의 종목별 종가 가져오기
+    # 과거 날짜의 종목별 종가 가져오기
     close_price_past = _get_close_price(past_date, market)
     past_close_price_dict = close_price_past.set_index('code')['close_price'].to_dict()
 
@@ -290,7 +292,7 @@ def get_validation_allday(market, lang, type, cache_update=False):
             )
             ORDER BY date DESC;""")
     
-        target_range = score_range_labels[0] if type == 'fall' else score_range_labels[-1]
+        target_range = SCORE_RANGE_LABELS[0] if type == 'fall' else SCORE_RANGE_LABELS[-1]
         data = pd.read_sql(query, engine, params={'target_range': target_range})
         data['date'] = pd.to_datetime(data['date']).dt.strftime('%Y-%m-%d')
         data['formated_date'] = pd.to_datetime(data['date']).dt.strftime('%y.%m.%d')
@@ -338,7 +340,7 @@ def _get_latest_range_total_counts(target_date, engine):
     
     if pd.isnull(previous_date):
         # 최신 데이터가 없으면 초기화
-        return {label: {'range_total_num': 0, 'total_rise_num': 0} for label in score_range_labels}, None
+        return {label: {'range_total_num': 0, 'total_rise_num': 0} for label in SCORE_RANGE_LABELS}, None
 
     query_latest_counts = text("""
         SELECT score_range, range_total_num, total_rise_num
@@ -347,10 +349,13 @@ def _get_latest_range_total_counts(target_date, engine):
     """)
     latest_counts_result = pd.read_sql(query_latest_counts, engine, params={'previous_date': previous_date})
     
-    range_total_counts = {row['score_range']: {'range_total_num': row['range_total_num'], 'total_rise_num': row['total_rise_num']} for idx, row in latest_counts_result.iterrows()}
+    range_total_counts = {row['score_range']: 
+                          {'range_total_num': row['range_total_num'], 
+                           'total_rise_num': row['total_rise_num']} 
+                           for idx, row in latest_counts_result.iterrows()}
     return range_total_counts, previous_date
 
-# 점수별 검증결과(상승/전체) 삽입
+# 점수별 검증목록(상승/전체) 삽입
 def insert_snp500_profit_validation(target_date):
     engine = get_engine()
     snp500_list = get_snp500_list()
@@ -359,7 +364,7 @@ def insert_snp500_profit_validation(target_date):
     range_total_counts, latest_date = _get_latest_range_total_counts(target_date, engine)
     
     # range_total_counts 초기화
-    for label in score_range_labels:
+    for label in SCORE_RANGE_LABELS:
         if label not in range_total_counts:
             range_total_counts[label] = {'range_total_num': 0, 'total_rise_num': 0}
     
@@ -375,7 +380,7 @@ def insert_snp500_profit_validation(target_date):
     
     results = []
     
-    for (low, high), label in zip(score_ranges, score_range_labels):
+    for (low, high), label in zip(SCORE_RANGES, SCORE_RANGE_LABELS):
         if low == '-inf':
             filtered = current_data[current_data['score_plus_avg'] <= high]
         elif high == 'inf':
@@ -401,7 +406,7 @@ def insert_snp500_profit_validation(target_date):
         results.append(result)
     
     # 모든 score_range에 대해 데이터가 존재하도록 보장
-    for label in score_range_labels:
+    for label in SCORE_RANGE_LABELS:
         if not any(res['score_range'] == label for res in results):
             results.append({
                 'date': target_date,
@@ -430,7 +435,7 @@ def _get_previous_day_data(target_date, engine):
 
     if pd.isnull(previous_date):
         # 이전 데이터가 없으면 초기화
-        return {label: {'range_total_num': 0, 'average_profit': 0, 'total_rise_num': 0} for label in score_range_labels}, None
+        return {label: {'range_total_num': 0, 'average_profit': 0, 'total_rise_num': 0} for label in SCORE_RANGE_LABELS}, None
 
     query_prev_data = text("""
         SELECT score_range, range_total_num, average_profit, total_rise_num
@@ -439,7 +444,11 @@ def _get_previous_day_data(target_date, engine):
     """)
     prev_data_result = pd.read_sql(query_prev_data, engine, params={'previous_date': previous_date})
     
-    prev_data = {row['score_range']: {'range_total_num': row['range_total_num'], 'average_profit': row['average_profit'], 'total_rise_num': row['total_rise_num']} for idx, row in prev_data_result.iterrows()}
+    prev_data = {row['score_range']: 
+                 {'range_total_num': row['range_total_num'], 
+                  'average_profit': row['average_profit'], 
+                  'total_rise_num': row['total_rise_num']} 
+                  for idx, row in prev_data_result.iterrows()}
     return prev_data, previous_date
 
 # profit_after_10day_nyse_naq 테이블에서 특정 target_date의 데이터를 가져오기
@@ -479,10 +488,10 @@ def update_snp500_profit_validation(target_date):
     # profit_after_10day_nyse_naq 테이블에서 특정 target_date의 데이터를 가져오기
     current_data = _get_profit_after_10day_data(engine, target_date)
     
-    # 이전 날짜의 데이터 가져오기
+    # 바로 이전날짜의 데이터 가져오기
     prev_data, previous_date = _get_previous_day_data(target_date, engine)
     results = []
-    for (low, high), label in zip(score_ranges, score_range_labels):
+    for (low, high), label in zip(SCORE_RANGES, SCORE_RANGE_LABELS):
         if low == '-inf':
             filtered = current_data[current_data['score_plus_avg'] <= high]
         elif high == 'inf':
@@ -530,7 +539,7 @@ def update_snp500_profit_validation(target_date):
         results.append(result)
     
     # 모든 score_range에 대해 데이터가 존재하도록 보장
-    for label in score_range_labels:
+    for label in SCORE_RANGE_LABELS:
         if not any(res['score_range'] == label for res in results):
             results.append({
                 'date': target_date,
@@ -582,6 +591,7 @@ def update_snp500_profit_validation(target_date):
     logging.info(f"snp500_profit_validation / {target_date} is updated")
 
 # 특정 날짜의 점수 구간별 통계 조회
+# validation/daily 에서 사용
 def get_snp500_profit_validation(date, code_list=True):
     engine = get_engine()
     
@@ -590,9 +600,8 @@ def get_snp500_profit_validation(date, code_list=True):
         FROM snp500_profit_validation
         WHERE date = :date
     """)
-    
-    params = {'date': date}
-    result_df = pd.read_sql(query, engine, params=params)
+
+    result_df = pd.read_sql(query, engine, params={'date': date})
     
     if not code_list:
         columns_to_keep = ['score_range', 'num', 'rise_num', 'range_total_num', 'total_rise_num']
@@ -602,10 +611,12 @@ def get_snp500_profit_validation(date, code_list=True):
 
         result_df['rise_ratio'] = np.where(result_df['range_total_num'] == 0, 0, result_df['total_rise_num'] / result_df['range_total_num'] * 100)
         result_df['rise_ratio'] = result_df['rise_ratio'].round(2)
+
+        # 직전의 데이터에서 어떻게 변화했는지 한 눈에 확인하기 위해 직전 데이터 추가
         result_df['prev_total_num'] = result_df['range_total_num'] - result_df['num']
         result_df['prev_total_rise_num'] = result_df['total_rise_num'] - result_df['rise_num']
 
-    # 앞 5개의 행을 선택하고 역전 라벨이 -인것을 앞으로 배치하기 위함
+    # 앞 5개의 행을 선택하고 역전 -> 라벨이 -인것을 앞으로 배치하기 위함
     reversed_top5 = result_df.iloc[:MINUS_LABEL_NUM].iloc[::-1]
     # 역전된 5개의 행과 나머지 데이터프레임을 결합
     result_df = pd.concat([reversed_top5, result_df.iloc[MINUS_LABEL_NUM:]]).reset_index(drop=True)
@@ -631,6 +642,8 @@ def get_total_validation(cache_update=False):
 
         data['rise_ratio'] = np.where(data['range_total_num'] == 0, 0, data['total_rise_num'] / data['range_total_num'] * 100)
         data['rise_ratio'] = data['rise_ratio'].round(2)
+
+        # 직전의 데이터에서 어떻게 변화했는지 한 눈에 확인하기 위해 직전 데이터 추가
         data['prev_total_num'] = data['range_total_num'] - data['num']
         data['prev_total_rise_num'] = data['total_rise_num'] - data['rise_num']
 
@@ -647,6 +660,7 @@ def get_total_validation(cache_update=False):
     return data
 
 # 특정 점수 구간의 최신 정보 조회
+# 메인 페이지, 종목 페이지에서 특정 점수 구간의 상승 확률을 표기하기 위함
 def get_rise_ratio(score_range):
     data = get_total_validation()
     result = data[data['score_range'] == score_range]

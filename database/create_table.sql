@@ -86,7 +86,6 @@ CREATE TABLE IF NOT EXISTS comparison_result_128day_kospi_daq (
     PRIMARY KEY (base_stock_code, base_date, compare_stock_code, compare_date),
 	FOREIGN KEY (base_stock_code) REFERENCES stock_code_list_kospi_daq(code) ON DELETE CASCADE,
 	FOREIGN KEY (compare_stock_code) REFERENCES stock_code_list_kospi_daq(code) ON DELETE CASCADE,
-    INDEX idx_base (base_stock_code, base_date)
 );
 
 CREATE TABLE IF NOT EXISTS comparison_result_128day_nyse_naq (
@@ -100,7 +99,6 @@ CREATE TABLE IF NOT EXISTS comparison_result_128day_nyse_naq (
     PRIMARY KEY (base_stock_code, base_date, compare_stock_code, compare_date),
 	FOREIGN KEY (base_stock_code) REFERENCES stock_code_list_nyse_naq(code) ON DELETE CASCADE,
 	FOREIGN KEY (compare_stock_code) REFERENCES stock_code_list_nyse_naq(code) ON DELETE CASCADE,
-    INDEX idx_base (base_stock_code, base_date)
 );
 
 CREATE TABLE IF NOT EXISTS comparison_result_64day_kospi_daq (
@@ -114,7 +112,6 @@ CREATE TABLE IF NOT EXISTS comparison_result_64day_kospi_daq (
     PRIMARY KEY (base_stock_code, base_date, compare_stock_code, compare_date),
 	FOREIGN KEY (base_stock_code) REFERENCES stock_code_list_kospi_daq(code) ON DELETE CASCADE,
 	FOREIGN KEY (compare_stock_code) REFERENCES stock_code_list_kospi_daq(code) ON DELETE CASCADE,
-    INDEX idx_base (base_stock_code, base_date)
 );
 
 CREATE TABLE IF NOT EXISTS comparison_result_64day_nyse_naq (
@@ -128,7 +125,6 @@ CREATE TABLE IF NOT EXISTS comparison_result_64day_nyse_naq (
     PRIMARY KEY (base_stock_code, base_date, compare_stock_code, compare_date),
 	FOREIGN KEY (base_stock_code) REFERENCES stock_code_list_nyse_naq(code) ON DELETE CASCADE,
 	FOREIGN KEY (compare_stock_code) REFERENCES stock_code_list_nyse_naq(code) ON DELETE CASCADE,
-    INDEX idx_base (base_stock_code, base_date)
 );
 
 CREATE TABLE IF NOT EXISTS comparison_result_32day_kospi_daq (
@@ -142,7 +138,6 @@ CREATE TABLE IF NOT EXISTS comparison_result_32day_kospi_daq (
     PRIMARY KEY (base_stock_code, base_date, compare_stock_code, compare_date),
 	FOREIGN KEY (base_stock_code) REFERENCES stock_code_list_kospi_daq(code) ON DELETE CASCADE,
 	FOREIGN KEY (compare_stock_code) REFERENCES stock_code_list_kospi_daq(code) ON DELETE CASCADE,
-    INDEX idx_base (base_stock_code, base_date)
 );
 
 CREATE TABLE IF NOT EXISTS comparison_result_32day_nyse_naq (
@@ -156,7 +151,6 @@ CREATE TABLE IF NOT EXISTS comparison_result_32day_nyse_naq (
     PRIMARY KEY (base_stock_code, base_date, compare_stock_code, compare_date),
 	FOREIGN KEY (base_stock_code) REFERENCES stock_code_list_nyse_naq(code) ON DELETE CASCADE,
 	FOREIGN KEY (compare_stock_code) REFERENCES stock_code_list_nyse_naq(code) ON DELETE CASCADE,
-    INDEX idx_base (base_stock_code, base_date)
 );
 
 CREATE TABLE IF NOT EXISTS comparison_result_16day_kospi_daq (
@@ -170,7 +164,6 @@ CREATE TABLE IF NOT EXISTS comparison_result_16day_kospi_daq (
     PRIMARY KEY (base_stock_code, base_date, compare_stock_code, compare_date),
 	FOREIGN KEY (base_stock_code) REFERENCES stock_code_list_kospi_daq(code) ON DELETE CASCADE,
 	FOREIGN KEY (compare_stock_code) REFERENCES stock_code_list_kospi_daq(code) ON DELETE CASCADE,
-    INDEX idx_base (base_stock_code, base_date)
 );
 
 CREATE TABLE IF NOT EXISTS comparison_result_16day_nyse_naq (
@@ -184,7 +177,6 @@ CREATE TABLE IF NOT EXISTS comparison_result_16day_nyse_naq (
     PRIMARY KEY (base_stock_code, base_date, compare_stock_code, compare_date),
 	FOREIGN KEY (base_stock_code) REFERENCES stock_code_list_nyse_naq(code) ON DELETE CASCADE,
 	FOREIGN KEY (compare_stock_code) REFERENCES stock_code_list_nyse_naq(code) ON DELETE CASCADE,
-    INDEX idx_base (base_stock_code, base_date)
 );
 
 CREATE TABLE IF NOT EXISTS comparison_result_8day_kospi_daq (
@@ -198,7 +190,6 @@ CREATE TABLE IF NOT EXISTS comparison_result_8day_kospi_daq (
     PRIMARY KEY (base_stock_code, base_date, compare_stock_code, compare_date),
 	FOREIGN KEY (base_stock_code) REFERENCES stock_code_list_kospi_daq(code) ON DELETE CASCADE,
 	FOREIGN KEY (compare_stock_code) REFERENCES stock_code_list_kospi_daq(code) ON DELETE CASCADE,
-    INDEX idx_base (base_stock_code, base_date)
 );
 
 CREATE TABLE IF NOT EXISTS comparison_result_8day_nyse_naq (
@@ -212,7 +203,6 @@ CREATE TABLE IF NOT EXISTS comparison_result_8day_nyse_naq (
     PRIMARY KEY (base_stock_code, base_date, compare_stock_code, compare_date),
 	FOREIGN KEY (base_stock_code) REFERENCES stock_code_list_nyse_naq(code) ON DELETE CASCADE,
 	FOREIGN KEY (compare_stock_code) REFERENCES stock_code_list_nyse_naq(code) ON DELETE CASCADE,
-    INDEX idx_base (base_stock_code, base_date)
 );
 
 -- 각 주식 종목의 통계 데이터 저장
@@ -349,14 +339,14 @@ CREATE TABLE IF NOT EXISTS view_nyse_naq (
 CREATE TABLE IF NOT EXISTS snp500_profit_validation (
     date DATE,
     score_range VARCHAR(10),
-    num INT NOT NULL,
-    rise_num INT,
-    range_total_num INT NOT NULL,
-    total_rise_num INT,
-    average_profit DECIMAL(10, 2),
-    all_stock_code VARCHAR(5000) NOT NULL,
-    rise_stock_code VARCHAR(5000),
-    fall_stock_code VARCHAR(5000),
+    num INT NOT NULL, -- 현재 date와 score_range에 해당하는 데이터의 개수
+    rise_num INT, -- num 중 상승한 종목의 개수
+    range_total_num INT NOT NULL, -- 최초 ~ 현재 date까지의 score_range에 해당하는 데이터 수
+    total_rise_num INT, -- range_total_num 중 상승한 종목의 개수
+    average_profit DECIMAL(10, 2), -- range_total_num의 데이터의 평균 수익률
+    all_stock_code VARCHAR(5000) NOT NULL, -- 현재 date와 score_range에 해당하는 종목들 - "A, B, C" 형태
+    rise_stock_code VARCHAR(5000), -- 검증결과 all_stock_code중 상승한 종목
+    fall_stock_code VARCHAR(5000), -- 검증결과 all_stock_code중
     
     PRIMARY KEY (date, score_range)
 );

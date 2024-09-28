@@ -41,14 +41,14 @@ def result():
         base_date = update_date
     
     day_num = int(day_num)
-    update_result_images(code, base_date, market, day_num, lang)
-
     similar_chart_data = get_similar_chart(code, base_date, market, day_num)
 
     if len(similar_chart_data) == 0:
         return render_template('none_result.html', market=market, translations=translations[lang], lang=lang)
+    
+    update_result_images(code, base_date, market, day_num, lang, similar_chart_data)
+    
     after_close_mean = round(similar_chart_data['after_close_change'].mean(), 2)
-
     # 'compare_stock_code' 열의 각 값에 'get_name' 함수를 적용하여 새로운 열 'compare_stock_name'을 생성합니다.
     similar_chart_data['compare_stock_name'] = similar_chart_data['compare_stock_code'].apply(get_name, args=(market, lang, ))
     similar_chart_data['compare_stock_industry'] = similar_chart_data['compare_stock_code'].apply(get_industry, args=(market, lang, ))

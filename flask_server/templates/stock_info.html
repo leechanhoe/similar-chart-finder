@@ -179,13 +179,6 @@
                             <br>
                             <span>{{ translations['10 거래일 후 상승 확률'] }}</span>
                             <span style="white-space: nowrap;">{{ translations['점수'] }} 
-                                <b class="{{ 'blue' if lang == 'ko' else 'red' }}" style="white-space: nowrap;">-4</b> 
-                                {{ translations['이하'] }} : 
-                                <b class="{{ 'blue' if lang == 'ko' else 'red' }}" style="white-space: nowrap;">
-                                    {{ range_low | round(2) }}
-                                </b>%
-                            </span>
-                            <span style="white-space: nowrap;">{{ translations['점수'] }} 
                                 <b class="{{ 'red' if lang == 'ko' else 'green' }}" style="white-space: nowrap;">6</b> 
                                 {{ translations['이상'] }} : 
                                 <b class="{{ 'red' if lang == 'ko' else 'green' }}" style="white-space: nowrap;">
@@ -247,6 +240,9 @@
                 <figcaption class="text-center none_info2" style="font-size: 15px; color: gray; font-weight: bold;">{{ translations['정보없음'] }} (0 / 0)</figcaption>
                 {% endif %}
             </figure>
+        </div>
+        <div>
+            <p class="text-center mt-3 warning">{{ translations['단순히 과거 비슷한 차트를 기반으로 분석한 것으로 투자의 책임은 <b>투자자 본인</b>에게 있습니다.'] | safe}}</p>
         </div>
         <!-- <div class='justify-content-center' style="margin-top: 30px;">
             <p class="text-center"><b>{{ analysis }}</b></p>
@@ -333,7 +329,6 @@
                 >> {{ translations['가장 평가가 좋은 종목 보기'] }}</a></p>
             <p class="text-center mt-3"><a href="{{ url_for('validation.validation', lang=lang)}}" onclick="LoadingWithMask();">
                 >> {{ translations['검증 결과 확인하기'] }}</a></p>
-            <p class="text-center mt-3 warning">{{ translations['단순히 과거 비슷한 차트를 기반으로 분석한 것으로 투자의 책임은 <b>투자자 본인</b>에게 있습니다.'] | safe}}</p>
         </div>
         <!-- 상단4 -->
         {% if user_agent != "SimilarChartFinder/1.0/dev" %}

@@ -413,6 +413,8 @@ def get_up_down_ranking(market, lang='ko', cache_update=False):
         data['average'] = data['average'].round(2)
         data = data.to_dict('records')
         updown.append(data)
+
+    # up_ranking, down_ranking
     return updown[0], updown[1]
 
 # 특정 종목의 N일치 비교 중 유효한 N들 반환

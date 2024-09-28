@@ -87,13 +87,6 @@
                             <div class="tooltip-text" id="tooltip_score">
                                 <span>{{ translations['10 거래일 후 상승 확률'] }}</span><br>
                                 <span style="white-space: nowrap;">{{ translations['점수'] }} 
-                                    <b class="{{ 'blue' if lang == 'ko' else 'red' }}" style="white-space: nowrap;">-4</b> 
-                                    {{ translations['이하'] }} : 
-                                    <b class="{{ 'blue' if lang == 'ko' else 'red' }}" style="white-space: nowrap;">
-                                        {{ range_low | round(2) }}
-                                    </b>%
-                                </span>
-                                <span style="white-space: nowrap;">{{ translations['점수'] }} 
                                     <b class="{{ 'red' if lang == 'ko' else 'green' }}" style="white-space: nowrap;">6</b> 
                                     {{ translations['이상'] }} : 
                                     <b class="{{ 'red' if lang == 'ko' else 'green' }}" style="white-space: nowrap;">
@@ -151,7 +144,7 @@
                 <figure class="mx-1">
                     <img src="{{ url_for('static', filename='image_data/static_image/badge.jpg') }}" 
                         class="img-fluid" style="width: 256px; height: 256px; border-radius:40px;" alt="badge" />
-                        <figcaption class="text-center" style="font-size: 13px;"><b>{{ translations['지속적인 실현손익 상위 5% 이내 유지 비법'] | safe}}</b></figcaption>
+                        <figcaption class="text-center" style="font-size: 13px;"><b>{{ translations['지속적인 실현손익 상위 5% 이내 유지'] | safe}}</b></figcaption>
                 </figure>
                 <figure class="mx-1">
                     <img src="{{ url_for('static', filename='image_data/static_image/contest.jpg') }}" 
