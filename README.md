@@ -30,9 +30,7 @@
   
 <img width="605" alt="MAU" src="https://github.com/user-attachments/assets/86c2f8a7-d6a1-4897-8e68-357f997d2594">
 
-
-<img width="685" alt="traffic" src="https://github.com/user-attachments/assets/1aa8dbf2-e291-4564-b64f-fb67b1ba62dd">
-
+<img width="605" alt="traffic" src="https://github.com/user-attachments/assets/02ac28df-f6a4-4fd4-bd4f-33d78f1ba381">
 
 <br>
 <br>
