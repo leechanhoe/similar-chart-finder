@@ -24,13 +24,13 @@
 <br>
 
 ## 성과
-- 하루 평균 트래픽 **10800** (미국 50.11%, 싱가포르 19.1%, 한국 15.82%, 기타 14.97% / 24.8.30 ~ 24.9.29)
-- MAU(월간 활성 사용자 수) **10840** (24.8.30 ~ 24.9.29)
+- 하루 평균 트래픽 **11200** (미국 48.73%, 싱가포르 20.25%, 한국 16.11%, 기타 14.91% / 24.9.1 ~ 24.9.30)
+- MAU(월간 활성 사용자 수) **11280** (24.9.1 ~ 24.9.30)
 - 비슷한 차트들이 주가 예측에 도움을 주는 것을 검증 (https://www.similarchart.com/validation)
   
-<img width="605" alt="MAU" src="https://github.com/user-attachments/assets/86c2f8a7-d6a1-4897-8e68-357f997d2594">
+<img width="600" alt="MAU" src="https://github.com/user-attachments/assets/a259a4ae-d118-4e57-b98e-bfdc7729f0a5">
 
-<img width="605" alt="traffic" src="https://github.com/user-attachments/assets/02ac28df-f6a4-4fd4-bd4f-33d78f1ba381">
+<img width="600" alt="traffic" src="https://github.com/user-attachments/assets/1974d3bb-3a17-43d2-a65e-aa56285d8b57">
 
 <br>
 <br>
