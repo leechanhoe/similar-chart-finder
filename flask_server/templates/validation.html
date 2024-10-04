@@ -158,7 +158,7 @@
                                 {{ row['score_range'] }}
                             </td>
                             <td>
-                                {% if row['rise_ratio'] >= 55 %}
+                                {% if row['rise_ratio'] >= 60 %}
                                 <b class="{{ 'red' if lang == 'ko' else 'green' }}">{{ row['rise_ratio'] }}%</b>
                                 {% elif row['rise_ratio'] <= 45 %}
                                 <b class="{{ 'blue' if lang == 'ko' else 'red' }}">{{ row['rise_ratio'] }}%</b>

@@ -25,14 +25,14 @@
 # # def _calculate_consecutive(stock_data, return_one=False):
 # #     # 연속성을 추적하기 위한 그룹 ID 생성
 # #     stock_data['Group'] = (stock_data['Trend'] != stock_data['Trend'].shift(1)).cumsum()
-    
+
 # #     # 각 그룹 내 'Volume'이 0인 행이 있는지 체크
 # #     volume_zero_groups = stock_data[stock_data['Volume'] == 0]['Group'].unique()
 
 # #     # 연속 카운트 계산
 # #     stock_data['Consecutive'] = stock_data.groupby('Group').cumcount() + 1
 # #     stock_data['Consecutive'] *= stock_data['Trend']
-    
+
 # #     # 연속된 마지막 날만 추출
 # #     # last_consecutive = stock_data.groupby('Group').tail(1)
 # #     # 'Volume'이 0인 행이 있는 그룹 제외
@@ -47,7 +47,7 @@
 
 # # def _calculate_consecutive_candles(stock_data, return_one=False):
 # #     # 양봉과 음봉을 식별합니다.
-# #     stock_data['Trend'] = np.where(stock_data['Close'] >= stock_data['Open'], 1, 
+# #     stock_data['Trend'] = np.where(stock_data['Close'] >= stock_data['Open'], 1,
 # #                                                np.where(stock_data['Close'] < stock_data['Open'], -1, 0))
 # #     return _calculate_consecutive(stock_data, return_one=return_one)
 
@@ -85,27 +85,27 @@
 #         fall_count=('Is Negative', 'sum'),
 #         total_count=('Consecutive', 'size')
 #     )
-    
+
 #     return agg_data
 
 # indicators = {
-#         'RSI': _calculate_rsi, 
+#         'RSI': _calculate_rsi,
 #         'Stochastic': _calculate_stochastic
-#         # 'ConsecutiveCandles': _calculate_consecutive_candles, 
+#         # 'ConsecutiveCandles': _calculate_consecutive_candles,
 #         # 'ConsecutiveTrends': _calculate_consecutive_trends  # 새로운 지표 추가
 #     }
 
 # indicators_lang = {
 #     'en': {
-#         'RSI': 'RSI(14)', 
+#         'RSI': 'RSI(14)',
 #         'Stochastic': 'Stochastic(12,5,5)'
-#         # 'ConsecutiveCandles1': 'Consecutive + Candles', 
-#         # 'ConsecutiveCandles0': 'Consecutive - Candles', 
+#         # 'ConsecutiveCandles1': 'Consecutive + Candles',
+#         # 'ConsecutiveCandles0': 'Consecutive - Candles',
 #         # 'ConsecutiveTrends1': 'Consecutive Rises',
 #         # 'ConsecutiveTrends0': 'Consecutive Falls',
-#     }, 
+#     },
 #     'ko': {
-#         'RSI': 'RSI(14)', 
+#         'RSI': 'RSI(14)',
 #         'Stochastic': 'Stochastic(12,5,5)'
 #         # 'ConsecutiveCandles1': '연속 양봉 수',
 #         # 'ConsecutiveCandles0': '연속 음봉 수',
@@ -144,9 +144,9 @@
 #                 # RSI, Stochastic과 같은 기타 지표들
 #                 indicator_values = indicator_func(data.copy())
 #                 agg_results = _aggregate_indicator_results(data.copy(), indicator_values, indicator_name)
-            
+
 #             final_results[indicator_name].append(agg_results)
-    
+
 #     # 각 지표별로 모든 결과 합치기 및 평균/합계 처리
 #     for indicator_name in final_results:
 #         combined_results = pd.concat(final_results[indicator_name], axis=0)
@@ -165,7 +165,7 @@
 
 #     for indicator_name in final_results.keys():
 #         final_results[indicator_name].to_csv(f"/app/shared_files/shared_data/indicator_{market}_{indicator_name}.csv")
-    
+
 #     logging.info(f"update_indicator {market} done")
 #     return final_results
 
@@ -181,11 +181,11 @@
 #         logging.info(f"get_indicator {market} from file")
 #     else:
 #         indicator_data = pickle.loads(indicator_data)
-    
+
 #     for indicator_name in indicator_data.keys():
 #         indicator_data[indicator_name]['average_return'] = indicator_data[indicator_name]['average_return'].round(2)
 #         indicator_data[indicator_name]['rise_rate'] = indicator_data[indicator_name]['rise_rate'].round(2)
-    
+
 #     return_data = []
 #     for indicator_name, indicator_func in indicators.items():
 #         value = int(indicator_func(stock_data, return_one=True))

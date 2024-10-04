@@ -114,7 +114,7 @@ button {
     // 오늘하루 보지 않기 버튼
     $(".main_popup").on("click", ".btn_today_close", function () {
         // 로컬 스토리지에 today라는 이름으로 1일(24시간 뒤) 동안 보이지 않게
-        handleStorage.setStorage("today", 1);
+        handleStorage.setStorage("today", 7);
         $(this).parents(".main_popup.on").removeClass("on");
     });
 
@@ -151,7 +151,7 @@ button {
           </div>        
         <div class="btn_wrap">
             <!-- 오늘 하루 보지 않기 --->
-            <button class="btn_today_close"><span>{{ translations["오늘 하루 보지 않기"] | safe}}</span></button>
+            <button class="btn_today_close"><span>{{ translations["일주일간 닫기"] | safe}}</span></button>
             <!-- 그냥 닫기 --->
             <button class="btn_close">close</button>
         </div>

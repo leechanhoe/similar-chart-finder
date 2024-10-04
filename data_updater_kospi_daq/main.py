@@ -5,7 +5,7 @@ import traceback
 import logging
 
 # 로그의 출력 형식을 설정합니다.
-FORMAT = '[%(asctime)s] %(levelname)s: %(message)s'
+FORMAT = "[%(asctime)s] %(levelname)s: %(message)s"
 # 로그 레벨을 INFO로 설정하고, 출력 형식을 적용합니다.
 logging.basicConfig(level=logging.INFO, format=FORMAT)
 
@@ -21,8 +21,5 @@ except Exception as e:
     notify_via_lambda(f"{e}\n{tb}")
 
     log_error_to_db(
-        level='ERROR',
-        service=f'data_updater_{market}',
-        message=str(e),
-        tb=tb
+        level="ERROR", service=f"data_updater_{market}", message=str(e), tb=tb
     )
