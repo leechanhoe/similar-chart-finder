@@ -48,7 +48,7 @@
 
 ## 시스템 아키텍처
 
-![그림1](https://github.com/user-attachments/assets/ef6b0e27-b39b-4577-aaa5-c01e222cfee0)
+![architecture](https://github.com/user-attachments/assets/502e266d-be36-4137-a390-098f7652b593)
 
 관련 글 : https://blog.similarchart.com/140
 
