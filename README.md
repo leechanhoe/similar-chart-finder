@@ -28,9 +28,9 @@
 - MAU(월간 활성 사용자 수) **11280** (24.9.1 ~ 24.9.30)
 - 비슷한 차트들이 주가 예측에 도움을 주는 것을 검증 (https://www.similarchart.com/validation)
   
-<img width="600" alt="MAU" src="https://github.com/user-attachments/assets/a259a4ae-d118-4e57-b98e-bfdc7729f0a5">
+![image](https://github.com/user-attachments/assets/a259a4ae-d118-4e57-b98e-bfdc7729f0a5)
 
-<img width="600" alt="traffic" src="https://github.com/user-attachments/assets/1974d3bb-3a17-43d2-a65e-aa56285d8b57">
+![image](https://github.com/user-attachments/assets/1974d3bb-3a17-43d2-a65e-aa56285d8b57)
 
 <br>
 <br>
@@ -38,6 +38,8 @@
 <br>
 
 ## 프로젝트 수행 내용
+
+![image](https://github.com/user-attachments/assets/4a5f2ebc-2bc8-456e-b0f7-a18fb35ba766)
 
 ![image](https://github.com/user-attachments/assets/4a1abaca-b3d4-4d1e-8033-9ead41c68966)
 
