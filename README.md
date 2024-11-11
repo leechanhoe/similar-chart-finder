@@ -28,9 +28,9 @@
 - MAU(월간 활성 사용자 수) **11280** (24.9.1 ~ 24.9.30)
 - 비슷한 차트들이 주가 예측에 도움을 주는 것을 검증 (https://www.similarchart.com/validation)
   
-<img width="600" alt="MAU" src="https://github.com/user-attachments/assets/a259a4ae-d118-4e57-b98e-bfdc7729f0a5">
+![image](https://github.com/user-attachments/assets/a259a4ae-d118-4e57-b98e-bfdc7729f0a5)
 
-<img width="600" alt="traffic" src="https://github.com/user-attachments/assets/1974d3bb-3a17-43d2-a65e-aa56285d8b57">
+![image](https://github.com/user-attachments/assets/1974d3bb-3a17-43d2-a65e-aa56285d8b57)
 
 <br>
 <br>
@@ -39,7 +39,19 @@
 
 ## 프로젝트 수행 내용
 
+![image](https://github.com/user-attachments/assets/4a5f2ebc-2bc8-456e-b0f7-a18fb35ba766)
+
 ![image](https://github.com/user-attachments/assets/4a1abaca-b3d4-4d1e-8033-9ead41c68966)
+
+![image](https://github.com/user-attachments/assets/8ba521a6-d68c-40c9-ace9-11d15bb23fc0)
+
+![image](https://github.com/user-attachments/assets/20a0dcc1-9083-4354-8931-5211dab2a0fd)
+
+![image](https://github.com/user-attachments/assets/d1ebe9bc-69cc-4bcc-b88f-ae895ba71189)
+
+![image](https://github.com/user-attachments/assets/d53d0812-edfa-4522-882d-d1e74834ddcd)
+
+
 
 <br>
 <br>
@@ -48,7 +60,7 @@
 
 ## 시스템 아키텍처
 
-![그림1](https://github.com/user-attachments/assets/ef6b0e27-b39b-4577-aaa5-c01e222cfee0)
+![architecture](https://github.com/user-attachments/assets/502e266d-be36-4137-a390-098f7652b593)
 
 관련 글 : https://blog.similarchart.com/140
 
