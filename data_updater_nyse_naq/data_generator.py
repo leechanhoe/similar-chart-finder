@@ -250,7 +250,7 @@ def _update_changed_stocks(connection, market, df_codes, db_stock_data_df, lang)
         )
 
 
-def get_latest_stock_data(
+def _get_latest_stock_data(
     base_date: datetime,
     df_codes: pd.DataFrame,
     day_ago_close: Dict[str, float],
@@ -317,7 +317,7 @@ def get_latest_stock_data(
     return df, reupdate, invalid
 
 
-def insert_all_price_data(code, new_data_df, market, connection):
+def _insert_all_price_data(code, new_data_df, market, connection):
     """주가 데이터를 DB에 삽입"""
 
     if new_data_df.empty:
@@ -352,6 +352,7 @@ def insert_all_price_data(code, new_data_df, market, connection):
 
 def update_stock_data(base_date, market, month=130, recreate=False):
     """주가 데이터 업데이트"""
+
     logging.info(f"start update_stock_data_{market}")
     engine = get_engine()
     df_codes = get_stock_code(market)
@@ -402,6 +403,7 @@ def _initialize_stock_data(
     connection, df_codes, base_date, market, start_date, start_date2, end_date
 ):
     """초기 주가 데이터 삽입"""
+
     invalid = []
     compared_code_list = get_compared_code_list(market)
     if len(compared_code_list) != 0:
@@ -429,7 +431,7 @@ def _initialize_stock_data(
         new_data_df["Change"] = (
             new_data_df["Close"] - new_data_df["Prev Close"]
         ) / new_data_df["Prev Close"]
-        insert_all_price_data(code, new_data_df, market, connection)
+        _insert_all_price_data(code, new_data_df, market, connection)
         time.sleep(0.1)
 
     query = text(
@@ -449,6 +451,7 @@ def _update_latest_stock_data(
     connection, df_codes, base_date, market, start_date, end_date
 ):
     """최신 주가 데이터 업데이트"""
+
     if not is_market_open(base_date, market):
         return 0
 
@@ -469,7 +472,7 @@ def _update_latest_stock_data(
     """
     df = pd.read_sql_query(query, connection)
     day_ago_close = df.set_index("code")["close_price"].to_dict()
-    latest_df, reupdate, invalid = get_latest_stock_data(
+    latest_df, reupdate, invalid = _get_latest_stock_data(
         base_date, df_codes, day_ago_close, market
     )
     latest_df = latest_df[latest_df["Code"].isin(df_codes["code"].values)]
@@ -502,7 +505,7 @@ def _update_latest_stock_data(
         new_data_df["Change"] = (
             new_data_df["Close"] - new_data_df["Prev Close"]
         ) / new_data_df["Prev Close"]
-        insert_all_price_data(code, new_data_df, market, connection)
+        _insert_all_price_data(code, new_data_df, market, connection)
         time.sleep(0.2)
 
     query = text(

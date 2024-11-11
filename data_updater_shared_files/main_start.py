@@ -46,7 +46,8 @@ def _market_open_day(market, start_time):
 
 # 주식시장이 닫힌 날 실행
 def _market_close_day(market, start_time):
-    if datetime.today().weekday() == 5:  # 토요일이면
+    weekday = datetime.today().weekday()
+    if weekday == 5:  # 토요일이면
         update_valid_stock_code(
             market, base_on_ranking=10000 if market == "kospi_daq" else 1000
         )  # (in)valid 종목 리스트 업데이트
@@ -58,12 +59,14 @@ def _market_close_day(market, start_time):
         update_investing_url(
             get_stock_code(market, only_code=True), market, recreate=True
         )
-        # update_translated_name(market)
         update_industry_en(market)
 
         save_pattern(start_time, market, 4)  # 패턴 검색을 위한 데이터 갱신
         delete_cache_image()
         delete_past_statistics_cache()  # 검증 페이지용 통계 데이터 삭제
+
+    elif weekday == 6:
+        update_translated_name(market)
 
 
 # 매일 실행되어야하는 함수

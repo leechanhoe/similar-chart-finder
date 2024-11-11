@@ -95,6 +95,7 @@ def _get_krx_code() -> None:
 
 def update_code_list(market: str):
     """종목 코드 리스트 업데이트"""
+
     logging.info(f"start update_code_list_{market}")
     engine = get_engine()
     lang = "ko"
@@ -172,6 +173,7 @@ def update_code_list(market: str):
 
 def _get_existing_stock_codes(connection, market: str, lang: str) -> pd.DataFrame:
     """데이터베이스에서 기존 주식 코드 조회"""
+
     query = f"""
     SELECT 
         scl.code, 
@@ -196,6 +198,7 @@ def _add_new_stocks(
     lang: str,
 ):
     """신규 상장된 종목을 데이터베이스에 추가"""
+
     new_stocks_df = df_codes[~df_codes["code"].isin(db_stock_data_df["code"])]
     new_stocks_df = new_stocks_df.drop_duplicates("code", keep="first")
 
@@ -215,6 +218,7 @@ def _remove_delisted_stocks(
     connection, market: str, df_codes: pd.DataFrame, db_stock_data_df: pd.DataFrame
 ):
     """상장 폐지된 종목을 데이터베이스에서 삭제"""
+
     delisted_stocks_df = db_stock_data_df[
         ~db_stock_data_df["code"].isin(df_codes["code"])
     ]
@@ -231,6 +235,7 @@ def _update_changed_stocks(
     lang: str,
 ):
     """변경된 종목 정보를 업데이트"""
+
     common_stocks_db_set = db_stock_data_df[
         db_stock_data_df["code"].isin(df_codes["code"])
     ]
@@ -272,8 +277,9 @@ def _update_changed_stocks(
         )
 
 
-def insert_all_price_data(code, new_data_df, market, connection):
+def _insert_all_price_data(code, new_data_df, market, connection):
     """주가 데이터를 DB에 삽입"""
+
     if new_data_df.empty:
         logging.info(f"{code}'s new_data_df is empty")
         return
@@ -304,8 +310,9 @@ def insert_all_price_data(code, new_data_df, market, connection):
         logging.info(f"{code}, 에서 {e} 오류 발생")
 
 
-def get_latest_stock_data(base_date, df_codes, day_ago_close, market):
+def _get_latest_stock_data(base_date, df_codes, day_ago_close, market):
     """최신 날짜의 주가 데이터 조회 (증자, 감자, 분할등의 체크를 위해)"""
+
     engine = get_engine()
 
     latest_date_query = f"""
@@ -365,58 +372,11 @@ def get_latest_stock_data(base_date, df_codes, day_ago_close, market):
     return df, reupdate, invalid
 
 
-def update_stock_data(base_date, market, month=130, recreate=False):
-    """주가 데이터 업데이트"""
-    logging.info(f"start update_stock_data_{market}")
-    engine = get_engine()
-    df_codes = get_stock_code(market)
-
-    end_date = base_date.strftime("%Y-%m-%d")
-    start_date = (base_date - relativedelta(months=month)).strftime("%Y-%m-%d")
-    start_date2 = (base_date - relativedelta(months=12)).strftime(
-        "%Y-%m-%d"
-    )  # 인기가 없는 종목은 비슷한차트 탐색 시 제외
-
-    with engine.begin() as connection:
-        if (
-            recreate
-        ):  # 주가 데이터의 무결성을 위해 주기적으로 데이터 전체 삭제 후 전체 다시 생성
-            connection.execute(text(f"DELETE FROM stock_data_{market}"))
-
-        count_records_query_result = connection.execute(
-            text(f"SELECT COUNT(*) FROM stock_data_{market} LIMIT 1")
-        )
-        count_records_total = count_records_query_result.fetchone()[0]
-
-        data_len = 0
-        if (
-            count_records_total == 0
-        ):  # 초기 상태: 데이터베이스에 데이터가 없는 상태면 전체 데이터를 넣어주기
-            data_len = _recreate_stock_data(
-                connection, df_codes, market, start_date, start_date2, end_date
-            )
-        else:  # 데이터베이스가 초기화된 상태이면 최신 일자의 데이터만 넣기
-            if not is_market_open(base_date, market):
-                return
-            data_len = _update_latest_stock_data(
-                connection, df_codes, base_date, market, start_date, end_date
-            )
-
-        if data_len == 0:
-            connection.execute(text("ROLLBACK;"))
-            raise Exception(f"삽입된 주가 데이터가 없습니다.")
-
-        _adjust_price_data(connection, market)
-
-        # 트랜잭션 커밋은 engine.begin() 블록이 끝날 때 자동으로 이루어집니다.
-
-    get_all_date_stock_data("005930", market, reupdate=True)
-
-
 def _recreate_stock_data(
     connection, df_codes, market, start_date, start_date2, end_date
 ):
     """전체 주가 데이터 삭제 후 다시 생성"""
+
     compared_code_list = get_compared_code_list(market)
     if len(compared_code_list) != 0:
         # comparison 테이블에 비교당한 코드면 11년치 데이터를 모두 가지고 있도록 compared라는 열로 comparison 테이블에 속한 여부 확인
@@ -441,7 +401,7 @@ def _recreate_stock_data(
             invalid.append(code)
             continue
 
-        insert_all_price_data(code, new_data_df, market, connection)
+        _insert_all_price_data(code, new_data_df, market, connection)
         time.sleep(0.2)
 
     query = text(
@@ -460,6 +420,7 @@ def _update_latest_stock_data(
     connection, df_codes, base_date, market, start_date, end_date
 ):
     """최신 일자의 데이터만 업데이트"""
+
     # 지정 기간이 지난 데이터 삭제
     query = text(
         f"""
@@ -520,7 +481,7 @@ def _update_latest_stock_data(
         logging.warning(f"fdr.StockListing('KRX') error : \n{e}")
 
         day_ago_close = latest_closing_prices.set_index("code")["close_price"].to_dict()
-        latest_df, reupdate, invalid = get_latest_stock_data(
+        latest_df, reupdate, invalid = _get_latest_stock_data(
             base_date, df_codes, day_ago_close, market
         )
         latest_df = latest_df[latest_df["Code"].isin(df_codes["code"].values)]
@@ -546,7 +507,7 @@ def _update_latest_stock_data(
             logging.info(f"Error occurred while fetching data for {code}: {e}")
             continue
 
-        insert_all_price_data(code, new_data_df, market, connection)
+        _insert_all_price_data(code, new_data_df, market, connection)
         time.sleep(0.3)
 
     today = base_date.strftime("%Y-%m-%d")
@@ -585,6 +546,7 @@ def _update_latest_stock_data(
 
 def _adjust_price_data(connection, market):
     """가격 데이터 수정"""
+
     # 고가와 저가가 제대로 적용되지 않는 경우를 수정
     adjustments = [
         f"UPDATE stock_data_{market} SET high_price = open_price WHERE open_price > high_price;",
@@ -594,3 +556,49 @@ def _adjust_price_data(connection, market):
     ]
     for adjustment in adjustments:
         connection.execute(text(adjustment))
+
+
+def update_stock_data(base_date, market, month=130, recreate=False):
+    """주가 데이터 업데이트"""
+    logging.info(f"start update_stock_data_{market}")
+    engine = get_engine()
+    df_codes = get_stock_code(market)
+
+    end_date = base_date.strftime("%Y-%m-%d")
+    start_date = (base_date - relativedelta(months=month)).strftime("%Y-%m-%d")
+    start_date2 = (base_date - relativedelta(months=12)).strftime(
+        "%Y-%m-%d"
+    )  # 인기가 없는 종목은 비슷한차트 탐색 시 제외
+
+    with engine.begin() as connection:
+        if recreate:
+            # 주가 데이터의 무결성을 위해 주기적으로 데이터 전체 삭제 후 전체 다시 생성
+            connection.execute(text(f"DELETE FROM stock_data_{market}"))
+
+        count_records_query_result = connection.execute(
+            text(f"SELECT COUNT(*) FROM stock_data_{market} LIMIT 1")
+        )
+        count_records_total = count_records_query_result.fetchone()[0]
+
+        data_len = 0
+        if count_records_total == 0:
+            # 초기 상태: 데이터베이스에 데이터가 없는 상태면 전체 데이터를 넣어주기
+            data_len = _recreate_stock_data(
+                connection, df_codes, market, start_date, start_date2, end_date
+            )
+        else:  # 데이터베이스가 초기화된 상태이면 최신 일자의 데이터만 넣기
+            if not is_market_open(base_date, market):
+                return
+            data_len = _update_latest_stock_data(
+                connection, df_codes, base_date, market, start_date, end_date
+            )
+
+        if data_len == 0:
+            connection.execute(text("ROLLBACK;"))
+            raise Exception(f"삽입된 주가 데이터가 없습니다.")
+
+        _adjust_price_data(connection, market)
+
+        # 트랜잭션 커밋은 engine.begin() 블록이 끝날 때 자동으로 이루어집니다.
+
+    get_all_date_stock_data("005930", market, reupdate=True)

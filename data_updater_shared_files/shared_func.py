@@ -135,35 +135,38 @@ def update_view(market):
 
 # 유효한 종목(시총 상위 N개)의 무결성을 위한 로직
 def update_valid_stock_code(market, base_on_ranking=10000):
-    delete_invalid_comparison_result(
-        market
-    )  # valid를 업데이트하기 전이나 후나 한번이라도 invalid가 됐으면 삭제
-    update_valid_requested_stock_code(
-        market
-    )  # 관리자가 특정 코드를 (in)validate하라는 요청이 있는지 확인 후 실행
-    update_valid_base_on_ranking(
-        market, base_on_ranking
-    )  # 시총 순위가 ranking 이하인 종목은 유효한 종목이라고 판단
-    update_cache_code_name_industry_url(
-        market
-    )  # 위 2 함수로 valid가 업데이트 된 것을 레디스 캐시에 반영
-    delete_invalid_comparison_result(market)  # invalid된 종목들의 비교 결과들은 삭제
+    # valid를 업데이트하기 전이나 후나 한번이라도 invalid가 됐으면 삭제
+    delete_invalid_comparison_result(market)
+
+    # 관리자가 특정 코드를 (in)validate하라는 요청이 있는지 확인 후 실행
+    update_valid_requested_stock_code(market)
+
+    # 시총 순위가 ranking 이하인 종목은 유효한 종목이라고 판단
+    update_valid_base_on_ranking(market, base_on_ranking)
+
+    # 위 2 함수로 valid가 업데이트 된 것을 레디스 캐시에 반영
+    update_cache_code_name_industry_url(market)
+
+    # invalid된 종목들의 비교 결과들은 삭제
+    delete_invalid_comparison_result(market)
 
 
 # 시총이 커트라인보다 낮아지면 유효코드리스트에서 삭제 / 높아지면 추가
 def update_valid_base_on_ranking(market, cutline=10000):
+
     logging.info(f"Start update_valid_base_on_ranking - {market}")
     engine = get_engine()
 
     with engine.begin() as connection:
         # 하락하여 시총 상위 커트라인 아래로 내려간 종목은 삭제
         query = text(
-            f"SELECT code, ranking FROM stock_code_list_{market} WHERE {cutline} < ranking AND valid = 1 AND user_request = 0"
-        )  # 유저 요청종목은 제외
+            f"""SELECT code, ranking FROM stock_code_list_{market} 
+            WHERE {cutline} < ranking AND valid = 1 AND user_request = 0"""
+        )
+        # 유저 요청종목은 제외
         delist = pd.read_sql(query, engine)
-        delist = delist[
-            ~delist["code"].isin(get_compared_code_list(market))
-        ]  # 비교 테이블에 없는 행만 삭제
+        # 비교 테이블에 없는 행만 삭제
+        delist = delist[~delist["code"].isin(get_compared_code_list(market))]
         logging.info(f"number of delist : {len(delist)}")
 
         update_query = text(
@@ -177,7 +180,8 @@ def update_valid_base_on_ranking(market, cutline=10000):
 
         # 상승하여 시총 상위 커트라인 위로 올라온 종목은 추가
         query = text(
-            f"SELECT code, ranking FROM stock_code_list_{market} WHERE ranking <= {cutline} AND valid = 0 AND user_request = 0"
+            f"""SELECT code, ranking FROM stock_code_list_{market} 
+            WHERE ranking <= {cutline} AND valid = 0 AND user_request = 0"""
         )
         enlist = pd.read_sql(query, engine)
         logging.info(f"number of enlist : {len(enlist)}")
@@ -194,7 +198,7 @@ def update_valid_base_on_ranking(market, cutline=10000):
         if market == "kospi_daq":
             query = text(
                 f"""UPDATE stock_code_list_{market} SET valid = 0 WHERE code IN 
-                        (SELECT code FROM stock_industry_kospi_daq WHERE industry_ko = '우선주 또는 정보없음')"""
+                    (SELECT code FROM stock_industry_kospi_daq WHERE industry_ko = '우선주 또는 정보없음')"""
             )
             invalid_num = connection.execute(query).rowcount
             logging.info(f"우선주 또는 정보없음으로 invalid된 개수 : {invalid_num}")
@@ -207,23 +211,23 @@ def update_valid_requested_stock_code(market):
 
     query = text(
         f"""SELECT t1.*
-                        FROM requested_stock_code_{market} t1
-                        JOIN (
-                            SELECT code, MAX(date) as max_date
-                            FROM requested_stock_code_{market}
-                            WHERE applied=0
-                            GROUP BY code
-                        ) t2
-                        ON t1.code = t2.code AND t1.date = t2.max_date
-                        ORDER BY t1.date;"""
+            FROM requested_stock_code_{market} t1
+            JOIN (
+                SELECT code, MAX(date) as max_date
+                FROM requested_stock_code_{market}
+                WHERE applied=0
+                GROUP BY code
+            ) t2
+            ON t1.code = t2.code AND t1.date = t2.max_date
+            ORDER BY t1.date;"""
     )  # code 별로 가장 최신 날짜의 행만을 가져오는 쿼리
     requested_stock_df = pd.read_sql(query, engine)
 
     with engine.begin() as connection:
         update_stock_code_list = text(
             f"""UPDATE stock_code_list_{market} 
-                                        SET valid = :valid, user_request = 1
-                                        WHERE code = :code"""
+                SET valid = :valid, user_request = 1
+                WHERE code = :code"""
         )
 
         for idx, row in requested_stock_df.iterrows():
@@ -258,7 +262,8 @@ def delete_invalid_comparison_result(market, delist=None):
             deleted_num = 0
             for day_num in get_day_num_list():
                 delete_comparison_result = text(
-                    f"DELETE FROM comparison_result_{day_num}day_{market} WHERE base_stock_code=:code"
+                    f"""DELETE FROM comparison_result_{day_num}day_{market} 
+                        WHERE base_stock_code=:code"""
                 )
                 deleted_num += connection.execute(
                     delete_comparison_result, {"code": code}
