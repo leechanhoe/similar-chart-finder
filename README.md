@@ -1,6 +1,6 @@
 # '비슷한 차트 검색기 - 주가 예측' 프로젝트
 
-전 종목의 최근 10년치 차트 중 사용자가 원하는 특정 차트와 가장 비슷한 차트를 제공하는 웹 & 앱 서비스 입니다.
+전 종목의 최근 10년치 차트 중 사용자가 원하는 특정 차트와 가장 비슷한 차트를 제공하는 1인개발 웹 & 앱 서비스 입니다.
 
 - Web : https://www.similarchart.com
 - App(Android) : https://play.google.com/store/apps/details?id=com.similarchart.chartfinder
