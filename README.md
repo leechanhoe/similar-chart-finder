@@ -27,10 +27,15 @@
 - 하루 평균 트래픽 **7220** (싱가포르 36.21%, 미국 25.96%, 한국 17.05%, 기타 20.78% / 25.1.9 ~ 25.2.7)
 - MAU(월간 순 활성 사용자 수) **14730** (25.1.9 ~ 25.2.7)
 - 비슷한 차트들이 주가 예측에 도움을 주는 것을 검증 (https://www.similarchart.com/validation)
+- 네이버, 구글 등 전세계 포털사이트 SEO 최상위 적용
   
 ![image](https://github.com/user-attachments/assets/3aac4aa1-6ff7-41e6-a63d-b8219726b5c2)
 
 ![image](https://github.com/user-attachments/assets/fb1488c7-974b-4605-b193-3d45cd3dc0cb)
+
+![image](https://github.com/user-attachments/assets/ce6f8f58-d11f-4db9-808b-aebafbd5be05)
+
+![image](https://github.com/user-attachments/assets/46bf0842-8f8b-4044-a02a-e6d8d6bfe06d)
 
 <br>
 <br>
